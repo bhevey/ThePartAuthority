@@ -37,7 +37,7 @@
         <div class="tpa-pdp__gallery" data-tpa-gallery>
           {% assign featured = product.featured_media %}
           {% if featured %}
-            <div class="tpa-pdp__stage" data-tpa-stage>
+            <div class="tpa-pdp__stage" data-tpa-stage data-tpa-zoom>
               {% render 'tpa-pdp-media', media: featured, index: 0 %}
               {% if section.settings.media_badge_enable %}
                 <div class="tpa-pdp__media-badge">
@@ -253,9 +253,24 @@
               {% unless v.available %}disabled{% endunless %}
               data-tpa-atc
             >
-              <span aria-hidden="true">🛒</span>
-              <span>{% if v.available %}{{ section.settings.atc_label }}{% else %}{{ section.settings.sold_out_label }}{% endif %}</span>
+              <span class="tpa-pdp__atc-default">
+                <span aria-hidden="true">🛒</span>
+                <span>{% if v.available %}{{ section.settings.atc_label }}{% else %}{{ section.settings.sold_out_label }}{% endif %}</span>
+              </span>
+              <span class="tpa-pdp__atc-success" aria-hidden="true">
+                <span>✓</span>
+                <span>Added!</span>
+              </span>
             </button>
+          </div>
+
+          <div class="tpa-pdp__shipping-bar" data-tpa-shipping-bar>
+            <div class="tpa-pdp__shipping-text">
+              <span data-tpa-shipping-msg>Free shipping on orders over ${{ section.settings.free_shipping_threshold | default: 75 }}</span>
+            </div>
+            <div class="tpa-pdp__shipping-track">
+              <div class="tpa-pdp__shipping-fill" data-tpa-shipping-fill style="width: {% assign threshold = section.settings.free_shipping_threshold | default: 75 | times: 100 %}{% assign pct = price | times: 100 | divided_by: threshold %}{% if pct > 100 %}100{% else %}{{ pct }}{% endif %}%"></div>
+            </div>
           </div>
 
           <div class="tpa-trust">
@@ -274,10 +289,16 @@
 
           <div class="tpa-pdp__sticky" data-tpa-sticky>
             <div class="tpa-pdp__sticky-left">
-              <div class="tpa-pdp__sticky-title">{{ product.title }}</div>
-              <div class="tpa-pdp__sticky-price">{{ price | money }}</div>
+              <div class="tpa-pdp__sticky-title">{{ product.title | truncate: 40 }}</div>
+              <div class="tpa-pdp__sticky-price">
+                {{ price | money }}
+                {% if compare > price %}
+                  <span class="tpa-pdp__sticky-save">Save {{ compare | minus: price | money }}</span>
+                {% endif %}
+              </div>
             </div>
             <button class="tpa-btn tpa-btn--primary tpa-pdp__sticky-atc" type="submit" name="add" {% unless v.available %}disabled{% endunless %}>
+              <span aria-hidden="true">🛒</span>
               {{ section.settings.atc_label }}
             </button>
           </div>
@@ -433,6 +454,24 @@
     width: 100%;
     height: auto;
     display: block;
+    transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  }
+
+  /* --- Image zoom on hover (desktop) --- */
+  @media (min-width: 981px){
+    .tpa-pdp--{{ sid }} .tpa-pdp__stage[data-tpa-zoom]{
+      cursor: zoom-in;
+    }
+    .tpa-pdp--{{ sid }} .tpa-pdp__stage[data-tpa-zoom]:hover img{
+      transform: scale(1.08);
+    }
+  }
+
+  /* --- Gallery transition when switching media --- */
+  .tpa-pdp--{{ sid }} .tpa-pdp__stage.is-switching img,
+  .tpa-pdp--{{ sid }} .tpa-pdp__stage.is-switching video{
+    opacity: 0;
+    transform: scale(0.96);
   }
 
   .tpa-pdp--{{ sid }} .tpa-pdp__media-badge{
@@ -476,6 +515,11 @@
     background: rgba(15, 23, 42, 0.04);
     padding: 6px;
     cursor: pointer;
+    transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__thumb:hover{
+    border-color: rgba(29, 91, 255, 0.30);
+    transform: translateY(-2px);
   }
   .tpa-pdp--{{ sid }} .tpa-pdp__thumb.is-active{
     border-color: rgba(29, 91, 255, 0.55);
@@ -581,17 +625,24 @@
     pointer-events: none;
   }
   .tpa-pdp--{{ sid }} .tpa-chip span{
-    padding: 10px 12px;
+    padding: 10px 14px;
     border-radius: 12px;
     border: 1px solid rgba(15, 23, 42, 0.10);
     background: rgba(255,255,255,0.85);
     font-weight: 900;
     font-size: 13px;
     cursor: pointer;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
+  }
+  .tpa-pdp--{{ sid }} .tpa-chip span:hover{
+    border-color: rgba(29, 91, 255, 0.30);
+    background: rgba(29, 91, 255, 0.03);
+    transform: translateY(-1px);
   }
   .tpa-pdp--{{ sid }} .tpa-chip input:checked + span{
     border-color: rgba(29, 91, 255, 0.55);
     box-shadow: 0 0 0 2px rgba(29, 91, 255, 0.14);
+    background: rgba(29, 91, 255, 0.04);
   }
 
   .tpa-pdp--{{ sid }} .tpa-pdp__module{
@@ -733,6 +784,14 @@
     font-weight: 950;
     cursor: pointer;
     color: rgba(var(--color-foreground), 0.78);
+    transition: background 150ms ease, color 150ms ease, transform 100ms ease;
+  }
+  .tpa-pdp--{{ sid }} .tpa-qty__btn:hover{
+    background: rgba(29, 91, 255, 0.06);
+    color: rgba(29, 91, 255, 0.95);
+  }
+  .tpa-pdp--{{ sid }} .tpa-qty__btn:active{
+    transform: scale(0.92);
   }
   .tpa-pdp--{{ sid }} .tpa-qty__input{
     border: 0;
@@ -760,11 +819,83 @@
     background: rgba(29, 91, 255, 0.95);
     color: #fff;
     box-shadow: 0 18px 44px rgba(2, 6, 23, 0.18);
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    position: relative;
+    overflow: hidden;
+  }
+  .tpa-pdp--{{ sid }} .tpa-btn--primary:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 20px 50px rgba(29, 91, 255, 0.28), 0 0 0 1px rgba(29, 91, 255, 0.15);
+  }
+  .tpa-pdp--{{ sid }} .tpa-btn--primary:active{
+    transform: translateY(0);
   }
   .tpa-pdp--{{ sid }} .tpa-pdp__atc:disabled{
     opacity: 0.55;
     cursor: default;
     box-shadow: none;
+  }
+
+  /* --- ATC success animation --- */
+  .tpa-pdp--{{ sid }} .tpa-pdp__atc-success{
+    display: none;
+    align-items: center;
+    gap: 8px;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__atc.is-success{
+    background: rgba(22, 163, 74, 0.95);
+    pointer-events: none;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__atc.is-success .tpa-pdp__atc-default{ display: none; }
+  .tpa-pdp--{{ sid }} .tpa-pdp__atc.is-success .tpa-pdp__atc-success{
+    display: inline-flex;
+    animation: tpaAtcPop{{ sid }} 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes tpaAtcPop{{ sid }}{
+    0%{ transform: scale(0.85); opacity: 0; }
+    100%{ transform: scale(1); opacity: 1; }
+  }
+
+  /* --- Free shipping progress bar --- */
+  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-bar{
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(29, 91, 255, 0.04);
+    border: 1px solid rgba(29, 91, 255, 0.10);
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-text{
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(var(--color-foreground), 0.72);
+    margin-bottom: 6px;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-track{
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.08);
+    overflow: hidden;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-fill{
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(29, 91, 255, 0.85), rgba(34, 197, 94, 0.90));
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-fill::after{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    animation: tpaShipShimmer{{ sid }} 2s ease-in-out infinite;
+  }
+  @keyframes tpaShipShimmer{{ sid }}{
+    0%{ transform: translateX(-100%); }
+    100%{ transform: translateX(100%); }
   }
 
   .tpa-pdp--{{ sid }} .tpa-trust{
@@ -779,34 +910,55 @@
 
   .tpa-pdp--{{ sid }} .tpa-pdp__sticky{
     position: sticky;
-    bottom: 12px;
+    bottom: 0;
     margin-top: 16px;
-    padding: 12px;
-    border-radius: 16px;
+    padding: 12px 16px;
+    border-radius: 16px 16px 0 0;
     border: 1px solid rgba(15, 23, 42, 0.10);
-    background: rgba(255,255,255,0.92);
+    border-bottom: none;
+    background: rgba(255,255,255,0.96);
     box-shadow:
-      0 18px 50px rgba(2, 6, 23, 0.10),
-      0 4px 14px rgba(2, 6, 23, 0.06);
+      0 -8px 30px rgba(2, 6, 23, 0.08),
+      0 -2px 10px rgba(2, 6, 23, 0.04);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__sticky.is-visible{
+    opacity: 1;
+    transform: translateY(0);
   }
   .tpa-pdp--{{ sid }} .tpa-pdp__sticky-title{
     font-weight: 950;
-    font-size: 12px;
+    font-size: 13px;
     color: rgba(var(--color-foreground), 0.86);
+    line-height: 1.2;
   }
   .tpa-pdp--{{ sid }} .tpa-pdp__sticky-price{
     font-weight: 950;
-    font-size: 12px;
-    color: rgba(var(--color-foreground), 0.62);
-    margin-top: 4px;
+    font-size: 13px;
+    color: rgba(var(--color-foreground), 0.72);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__sticky-save{
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(29, 91, 255, 0.95);
   }
   .tpa-pdp--{{ sid }} .tpa-pdp__sticky-atc{
     height: 44px;
-    padding: 0 14px;
+    padding: 0 18px;
+    flex-shrink: 0;
   }
 
   .tpa-pdp--{{ sid }} .tpa-pdp__mid{
@@ -969,12 +1121,41 @@
     font-weight: 950;
     cursor: pointer;
     color: rgba(var(--color-foreground), 0.86);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    transition: color 180ms ease;
+    padding: 4px 0;
+  }
+  .tpa-pdp--{{ sid }} .tpa-faq__q::-webkit-details-marker{ display: none; }
+  .tpa-pdp--{{ sid }} .tpa-faq__q::after{
+    content: '+';
+    font-size: 20px;
+    font-weight: 600;
+    color: rgba(var(--color-foreground), 0.4);
+    transition: transform 250ms ease, color 250ms ease;
+    flex-shrink: 0;
+  }
+  .tpa-pdp--{{ sid }} .tpa-faq__item[open] .tpa-faq__q::after{
+    content: '−';
+    transform: rotate(180deg);
+    color: rgba(29, 91, 255, 0.8);
+  }
+  .tpa-pdp--{{ sid }} .tpa-faq__q:hover{
+    color: rgba(var(--color-foreground), 1);
   }
   .tpa-pdp--{{ sid }} .tpa-faq__a{
     margin-top: 8px;
     font-size: 13px;
     line-height: 1.6;
     color: rgba(var(--color-foreground), 0.72);
+    animation: tpaFaqOpen{{ sid }} 0.3s ease;
+  }
+  @keyframes tpaFaqOpen{{ sid }}{
+    from{ opacity: 0; transform: translateY(-6px); }
+    to{ opacity: 1; transform: translateY(0); }
   }
 
   @media (max-width: 980px){
@@ -999,6 +1180,7 @@
     var root = document.querySelector('.tpa-pdp--{{ sid }}');
     if (!root) return;
 
+    /* --- Quantity picker --- */
     var dec = root.querySelector('[data-tpa-qty-dec]');
     var inc = root.querySelector('[data-tpa-qty-inc]');
     var qty = root.querySelector('[data-tpa-qty-input]');
@@ -1013,6 +1195,63 @@
       });
     }
 
+    /* --- ATC success animation --- */
+    var atcBtn = root.querySelector('[data-tpa-atc]');
+    var form = root.querySelector('[data-tpa-product-form]');
+    if (atcBtn && form){
+      form.addEventListener('submit', function(e){
+        e.preventDefault();
+        atcBtn.classList.add('is-success');
+        var formData = new FormData(form);
+        fetch('{{ routes.cart_add_url }}.js', {
+          method: 'POST',
+          body: formData,
+          credentials: 'same-origin'
+        }).then(function(r){ return r.json(); })
+        .then(function(){
+          setTimeout(function(){
+            atcBtn.classList.remove('is-success');
+          }, 1800);
+        })
+        .catch(function(){
+          atcBtn.classList.remove('is-success');
+          form.submit();
+        });
+      });
+    }
+
+    /* --- Sticky bar: show when ATC scrolls out of view --- */
+    var sticky = root.querySelector('[data-tpa-sticky]');
+    if (sticky && atcBtn){
+      var stickyObs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting){
+            sticky.classList.remove('is-visible');
+          } else {
+            sticky.classList.add('is-visible');
+          }
+        });
+      }, { threshold: 0 });
+      stickyObs.observe(atcBtn);
+    }
+
+    /* --- Gallery thumbnail switching with transition --- */
+    var stage = root.querySelector('[data-tpa-stage]');
+    var thumbs = root.querySelectorAll('[data-tpa-thumb]');
+    if (stage && thumbs.length > 1){
+      thumbs.forEach(function(thumb){
+        thumb.addEventListener('click', function(){
+          thumbs.forEach(function(t){ t.classList.remove('is-active'); });
+          thumb.classList.add('is-active');
+          stage.classList.add('is-switching');
+          setTimeout(function(){
+            stage.classList.remove('is-switching');
+          }, 300);
+        });
+      });
+    }
+
+    /* --- Fit checker --- */
     var fit = root.querySelector('[data-tpa-fit]');
     if (fit){
       var input = root.querySelector('[data-tpa-fit-input]');
@@ -1055,6 +1294,7 @@
       setState('warn', {{ section.settings.fit_state_default | json }});
     }
 
+    /* --- Product recommendations --- */
     var recHost = root.querySelector('[data-product-recommendations]');
     if (recHost){
       var url = recHost.getAttribute('data-url');
@@ -1092,6 +1332,7 @@
 
     { "type": "text", "id": "atc_label", "label": "Add to cart label", "default": "Add to Cart" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
+    { "type": "range", "id": "free_shipping_threshold", "label": "Free shipping threshold ($)", "min": 25, "max": 200, "step": 5, "default": 75 },
 
     { "type": "text", "id": "part_subheadline_fallback", "label": "Part subheadline fallback", "default": "Restore performance with a verified replacement, backed by support." },
     { "type": "text", "id": "appliance_subheadline_fallback", "label": "Appliance subheadline fallback", "default": "Premium performance, quality checked, backed by Australian support." },

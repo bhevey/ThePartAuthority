@@ -51,19 +51,26 @@
         © {{ 'now' | date: '%Y' }} {{ section.settings.copyright_text }}
       </div>
 
-      <div class="tpa-footer__badges" aria-label="Footer badges">
-        {% if section.settings.badge1_text != blank %}
-          <div class="tpa-footer__badge">
-            <span class="tpa-footer__badge-ic" aria-hidden="true">{{ section.settings.badge1_icon }}</span>
-            <span>{{ section.settings.badge1_text }}</span>
-          </div>
-        {% endif %}
-        {% if section.settings.badge2_text != blank %}
-          <div class="tpa-footer__badge">
-            <span class="tpa-footer__badge-ic" aria-hidden="true">{{ section.settings.badge2_icon }}</span>
-            <span>{{ section.settings.badge2_text }}</span>
-          </div>
-        {% endif %}
+      <div class="tpa-footer__bottom-right">
+        <div class="tpa-footer__badges" aria-label="Footer badges">
+          {% if section.settings.badge1_text != blank %}
+            <div class="tpa-footer__badge">
+              <span class="tpa-footer__badge-ic" aria-hidden="true">{{ section.settings.badge1_icon }}</span>
+              <span>{{ section.settings.badge1_text }}</span>
+            </div>
+          {% endif %}
+          {% if section.settings.badge2_text != blank %}
+            <div class="tpa-footer__badge">
+              <span class="tpa-footer__badge-ic" aria-hidden="true">{{ section.settings.badge2_icon }}</span>
+              <span>{{ section.settings.badge2_text }}</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <button class="tpa-footer__top-btn" type="button" aria-label="Back to top" data-tpa-back-top>
+          <span aria-hidden="true">↑</span>
+          <span>Top</span>
+        </button>
       </div>
     </div>
   </div>
@@ -101,11 +108,13 @@
     font-size: 14px;
     text-transform: uppercase;
     color: rgba(255,255,255,0.92);
+    display: inline-block;
   }
 
   .tpa-footer--{{ sid }} .tpa-footer__logo-accent{
     color: {{ section.settings.accent }};
     margin-left: 6px;
+    text-shadow: 0 0 20px rgba(29, 91, 255, 0.30);
   }
 
   .tpa-footer--{{ sid }} .tpa-footer__blurb{
@@ -135,11 +144,26 @@
     text-decoration: none;
     color: rgba(255,255,255,0.70);
     width: fit-content;
+    position: relative;
+    transition: color 200ms ease, transform 200ms ease;
+    padding-bottom: 1px;
   }
-
+  .tpa-footer--{{ sid }} .tpa-footer__link::after{
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    width: 0;
+    height: 1px;
+    background: {{ section.settings.accent }};
+    transition: width 250ms ease;
+  }
   .tpa-footer--{{ sid }} .tpa-footer__link:hover{
-    color: rgba(255,255,255,0.92);
-    text-decoration: underline;
+    color: rgba(255,255,255,0.95);
+    transform: translateX(3px);
+  }
+  .tpa-footer--{{ sid }} .tpa-footer__link:hover::after{
+    width: 100%;
   }
 
   .tpa-footer--{{ sid }} .tpa-footer__divider{
@@ -173,10 +197,44 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    transition: color 200ms ease;
+  }
+  .tpa-footer--{{ sid }} .tpa-footer__badge:hover{
+    color: rgba(255,255,255,0.95);
   }
 
   .tpa-footer--{{ sid }} .tpa-footer__badge-ic{
     opacity: 0.9;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__bottom-right{
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__top-btn{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.70);
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 200ms ease, color 200ms ease, transform 200ms ease, border-color 200ms ease;
+  }
+  .tpa-footer--{{ sid }} .tpa-footer__top-btn:hover{
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.95);
+    transform: translateY(-2px);
+    border-color: rgba(255,255,255,0.20);
+  }
+  .tpa-footer--{{ sid }} .tpa-footer__top-btn:active{
+    transform: translateY(0);
   }
 
   @media (max-width: 980px){
@@ -194,9 +252,33 @@
     .tpa-footer--{{ sid }} .tpa-footer__bottom{
       flex-direction: column;
       align-items: flex-start;
+      gap: 14px;
+    }
+    .tpa-footer--{{ sid }} .tpa-footer__bottom-right{
+      flex-direction: row;
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tpa-footer--{{ sid }} .tpa-footer__link,
+    .tpa-footer--{{ sid }} .tpa-footer__top-btn{
+      transition: none;
     }
   }
 </style>
+
+<script>
+  (function(){
+    var btn = document.querySelector('.tpa-footer--{{ sid }} [data-tpa-back-top]');
+    if (btn){
+      btn.addEventListener('click', function(){
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      });
+    }
+  })();
+</script>
 
 {% schema %}
 {
