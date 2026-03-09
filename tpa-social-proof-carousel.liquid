@@ -163,6 +163,14 @@
 
   .tpa-reviews--{{ sid }} .tpa-reviews__nav--prev{ left: -6px; }
   .tpa-reviews--{{ sid }} .tpa-reviews__nav--next{ right: -6px; }
+  .tpa-reviews--{{ sid }} .tpa-reviews__nav{
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  }
+  .tpa-reviews--{{ sid }} .tpa-reviews__nav:hover:not(:disabled){
+    transform: translateY(-50%) scale(1.08);
+    box-shadow: 0 14px 32px rgba(2, 6, 23, 0.18);
+    background: rgba(255,255,255,1);
+  }
 
   .tpa-reviews--{{ sid }} .tpa-review{
     scroll-snap-align: start;
@@ -177,6 +185,21 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease, border-color 260ms ease;
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  .tpa-reviews--{{ sid }} .tpa-review.is-revealed{
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease, border-color 260ms ease;
+  }
+  .tpa-reviews--{{ sid }} .tpa-review:hover{
+    transform: translateY(-3px);
+    box-shadow:
+      0 22px 56px rgba(2, 6, 23, 0.14),
+      0 6px 18px rgba(2, 6, 23, 0.08);
+    border-color: rgba(29, 91, 255, 0.15);
   }
 
   .tpa-reviews--{{ sid }} .tpa-review__stars{
@@ -256,6 +279,12 @@
     background: rgba(255,255,255,0.70);
     padding: 14px 16px;
     text-align: center;
+    transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+  }
+  .tpa-reviews--{{ sid }} .tpa-stat:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+    border-color: rgba(29, 91, 255, 0.15);
   }
 
   .tpa-reviews--{{ sid }} .tpa-stat__num{
@@ -263,6 +292,24 @@
     letter-spacing: -0.02em;
     font-size: 18px;
     color: rgb(var(--color-foreground));
+  }
+
+  /* --- Star entrance animation --- */
+  .tpa-reviews--{{ sid }} .tpa-review__stars .tpa-star{
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+  .tpa-reviews--{{ sid }} .tpa-review:hover .tpa-star.is-on{
+    animation: tpaStarBounce{{ sid }} 0.4s ease;
+  }
+  .tpa-reviews--{{ sid }} .tpa-review:hover .tpa-star.is-on:nth-child(2){ animation-delay: 0.05s; }
+  .tpa-reviews--{{ sid }} .tpa-review:hover .tpa-star.is-on:nth-child(3){ animation-delay: 0.1s; }
+  .tpa-reviews--{{ sid }} .tpa-review:hover .tpa-star.is-on:nth-child(4){ animation-delay: 0.15s; }
+  .tpa-reviews--{{ sid }} .tpa-review:hover .tpa-star.is-on:nth-child(5){ animation-delay: 0.2s; }
+  @keyframes tpaStarBounce{{ sid }}{
+    0%{ transform: scale(1); }
+    50%{ transform: scale(1.25); }
+    100%{ transform: scale(1); }
   }
 
   .tpa-reviews--{{ sid }} .tpa-stat__label{
@@ -311,8 +358,25 @@
     .tpa-reviews--{{ sid }} .tpa-reviews__stats{ grid-template-columns: 1fr; }
   }
 
+  /* --- Verified badge glow --- */
+  .tpa-reviews--{{ sid }} .tpa-review__badge{
+    transition: box-shadow 200ms ease;
+  }
+  .tpa-reviews--{{ sid }} .tpa-review:hover .tpa-review__badge{
+    box-shadow: 0 0 0 4px rgba(29, 91, 255, 0.12);
+  }
+
   @media (prefers-reduced-motion: reduce){
-    .tpa-reviews--{{ sid }} .tpa-reviews__btn{ transition: none; }
+    .tpa-reviews--{{ sid }} .tpa-reviews__btn,
+    .tpa-reviews--{{ sid }} .tpa-review,
+    .tpa-reviews--{{ sid }} .tpa-stat{ transition: none; }
+    .tpa-reviews--{{ sid }} .tpa-review{
+      opacity: 1;
+      transform: none;
+    }
+    .tpa-reviews--{{ sid }} .tpa-review:hover .tpa-star.is-on{
+      animation: none;
+    }
   }
 </style>
 
@@ -343,6 +407,48 @@
     rail.addEventListener('scroll', function(){ window.requestAnimationFrame(updateButtons); }, { passive: true });
     window.addEventListener('resize', updateButtons);
     updateButtons();
+
+    /* --- Stagger reveal reviews on scroll --- */
+    var reviews = rail.querySelectorAll('.tpa-review');
+    if (reviews.length && 'IntersectionObserver' in window){
+      var revObs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting){
+            var idx = Array.prototype.indexOf.call(reviews, entry.target);
+            setTimeout(function(){
+              entry.target.classList.add('is-revealed');
+            }, idx * 80);
+            revObs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.1 });
+      reviews.forEach(function(r){ revObs.observe(r); });
+    } else {
+      reviews.forEach(function(r){ r.classList.add('is-revealed'); });
+    }
+
+    /* --- Auto-scroll every 5s (pauses on hover/touch) --- */
+    var autoScrollTimer;
+    var paused = false;
+
+    function autoScroll(){
+      if (paused) return;
+      var max = rail.scrollWidth - rail.clientWidth;
+      if (rail.scrollLeft >= max - 2){
+        rail.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        rail.scrollBy({ left: 340, behavior: 'smooth' });
+      }
+    }
+
+    autoScrollTimer = setInterval(autoScroll, 5000);
+
+    rail.addEventListener('mouseenter', function(){ paused = true; });
+    rail.addEventListener('mouseleave', function(){ paused = false; });
+    rail.addEventListener('touchstart', function(){ paused = true; }, { passive: true });
+    rail.addEventListener('touchend', function(){
+      setTimeout(function(){ paused = false; }, 3000);
+    }, { passive: true });
   })();
 </script>
 
