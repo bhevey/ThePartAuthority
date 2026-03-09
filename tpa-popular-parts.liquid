@@ -1,0 +1,588 @@
+{% comment %}
+  Section: TPA Popular Parts
+  No app, no dependency. Uses native horizontal scroll + scroll-snap + arrows.
+{% endcomment %}
+
+{% assign sid = section.id %}
+<section class="tpa-popular tpa-popular--{{ sid }} color-{{ section.settings.color_scheme }}">
+  <div class="tpa-popular__header-wrap">
+    <div class="tpa-popular__inner {% if section.settings.section_width == 'full-width' %}tpa-popular__inner--full{% endif %}">
+      <div class="tpa-popular__header">
+        {% if section.settings.heading != blank %}
+          <h2 class="tpa-popular__title">{{ section.settings.heading }}</h2>
+        {% endif %}
+        {% if section.settings.subheading != blank %}
+          <p class="tpa-popular__subtitle">{{ section.settings.subheading }}</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="tpa-popular__inner {% if section.settings.section_width == 'full-width' %}tpa-popular__inner--full{% endif %}">
+    <div class="tpa-popular__rail-wrap">
+      <button class="tpa-popular__nav tpa-popular__nav--prev" type="button" aria-label="Previous" data-tpa-prev="{{ sid }}">
+        ‹
+      </button>
+
+      <div class="tpa-popular__rail" id="tpa-rail-{{ sid }}" data-tpa-rail>
+        {% for block in section.blocks %}
+          {% assign product = block.settings.product %}
+
+          {% if product != blank %}
+            {% assign v = product.selected_or_first_available_variant %}
+            {% assign available = v.available %}
+            {% assign compare = v.compare_at_price %}
+            {% assign price = v.price %}
+
+            <article class="tpa-card" {{ block.shopify_attributes }}>
+              <div class="tpa-card__top">
+                {% if block.settings.badge_text != blank %}
+                  <div
+                    class="tpa-card__badge"
+                    style="--badge-bg: {{ block.settings.badge_bg }}; --badge-fg: {{ block.settings.badge_fg }};"
+                  >
+                    <span class="tpa-card__badge-dot" aria-hidden="true">●</span>
+                    <span>{{ block.settings.badge_text }}</span>
+                  </div>
+                {% endif %}
+
+                <a class="tpa-card__media" href="{{ product.url }}">
+                  {% if product.featured_image %}
+                    <img
+                      src="{{ product.featured_image | image_url: width: 900 }}"
+                      alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                      loading="lazy"
+                      width="720"
+                      height="720"
+                    >
+                  {% endif %}
+                </a>
+              </div>
+
+              <div class="tpa-card__meta">
+                <div class="tpa-card__fit">
+                  <span class="tpa-card__check" aria-hidden="true">✓</span>
+                  <span>{{ section.settings.fit_text }}</span>
+                </div>
+
+                <a class="tpa-card__title" href="{{ product.url }}">{{ product.title }}</a>
+
+                {% if product.description != blank %}
+                  <div class="tpa-card__desc">
+                    {{ product.description | strip_html | truncate: 64 }}
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="tpa-card__buy">
+                <div class="tpa-card__price">
+                  {% if compare > price %}
+                    <span class="tpa-card__price-now">{{ price | money }}</span>
+                    <span class="tpa-card__price-was">{{ compare | money }}</span>
+                    <span class="tpa-card__save">Save {{ compare | minus: price | money }}</span>
+                  {% else %}
+                    <span class="tpa-card__price-now">{{ price | money }}</span>
+                  {% endif %}
+                </div>
+
+                <form method="post" action="{{ routes.cart_add_url }}" class="tpa-card__form">
+                  <input type="hidden" name="id" value="{{ v.id }}">
+                  <input type="hidden" name="quantity" value="1">
+                  <button
+                    type="submit"
+                    class="tpa-card__btn"
+                    {% unless available %}disabled{% endunless %}
+                    data-tpa-add
+                  >
+                    <span class="tpa-card__btn-ic" aria-hidden="true">🛒</span>
+                    <span>
+                      {% if available %}
+                        {{ section.settings.add_label }}
+                      {% else %}
+                        {{ section.settings.sold_out_label }}
+                      {% endif %}
+                    </span>
+                  </button>
+                </form>
+              </div>
+
+              {% if section.settings.urgency_text != blank %}
+                <div class="tpa-card__urgency">
+                  <span class="tpa-card__pulse" aria-hidden="true"></span>
+                  <span>{{ section.settings.urgency_text }}</span>
+                </div>
+              {% endif %}
+            </article>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <button class="tpa-popular__nav tpa-popular__nav--next" type="button" aria-label="Next" data-tpa-next="{{ sid }}">
+        ›
+      </button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tpa-popular--{{ sid }}{
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__header-wrap{
+    background: {{ section.settings.header_bg }};
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__inner{
+    max-width: 1260px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__inner--full{
+    max-width: none;
+    padding: 0 32px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__header{
+    text-align: center;
+    padding: 46px 0 24px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__title{
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    font-size: clamp(34px, 4.4vw, 58px);
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__subtitle{
+    margin: 10px auto 0;
+    max-width: 720px;
+    font-size: 16px;
+    line-height: 1.5;
+    color: rgba(var(--color-foreground), 0.70);
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__rail-wrap{
+    position: relative;
+    padding: 24px 0 10px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__rail{
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(280px, 1fr);
+    gap: 18px;
+    overflow-x: auto;
+    padding: 12px 6px 18px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 6px;
+    scrollbar-width: none;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__rail::-webkit-scrollbar{
+    display: none;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__nav{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.12);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 3;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-popular__nav--prev{ left: -6px; }
+  .tpa-popular--{{ sid }} .tpa-popular__nav--next{ right: -6px; }
+
+  .tpa-popular--{{ sid }} .tpa-popular__nav:disabled{
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card{
+    scroll-snap-align: start;
+    position: relative;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.10),
+      0 4px 14px rgba(2, 6, 23, 0.06);
+    overflow: hidden;
+    min-height: 430px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__top{
+    position: relative;
+    padding: 14px 14px 0;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__badge{
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-weight: 900;
+    font-size: 12px;
+    background: var(--badge-bg, #F59E0B);
+    color: var(--badge-fg, #0B1220);
+    box-shadow: 0 10px 22px rgba(2,6,23,0.18);
+    z-index: 2;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__badge-dot{
+    font-size: 10px;
+    opacity: 0.9;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__media{
+    display: block;
+    border-radius: 14px;
+    background: rgba(15, 23, 42, 0.06);
+    padding: 14px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__media img{
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    border-radius: 12px;
+    display: block;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__meta{
+    padding: 14px 16px 0;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__fit{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: rgba(15, 23, 42, 0.72);
+    font-weight: 800;
+    font-size: 13px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__check{
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(22, 163, 74, 0.16);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: rgba(22, 101, 52, 0.95);
+    font-weight: 900;
+    font-size: 12px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__title{
+    display: block;
+    margin-top: 10px;
+    font-weight: 900;
+    font-size: 14px;
+    line-height: 1.35;
+    color: rgb(var(--color-foreground));
+    text-decoration: none;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__desc{
+    margin-top: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(var(--color-foreground), 0.64);
+    min-height: 36px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__buy{
+    margin-top: auto;
+    padding: 14px 16px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__price{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__price-now{
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: 22px;
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__price-was{
+    font-size: 12px;
+    color: rgba(var(--color-foreground), 0.50);
+    text-decoration: line-through;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__save{
+    font-size: 12px;
+    font-weight: 900;
+    color: rgba(29, 91, 255, 0.95);
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__btn{
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: {{ section.settings.cta_bg }};
+    color: {{ section.settings.cta_fg }};
+    font-weight: 900;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 14px 30px rgba(2, 6, 23, 0.22);
+    transition: transform 140ms ease, opacity 140ms ease;
+    white-space: nowrap;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__btn:active{
+    transform: translateY(1px);
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__btn:disabled{
+    opacity: 0.55;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__urgency{
+    padding: 0 16px 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(15, 23, 42, 0.68);
+  }
+
+  .tpa-popular--{{ sid }} .tpa-card__pulse{
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45);
+    animation: tpaPulse{{ sid }} 1.6s infinite;
+  }
+
+  @keyframes tpaPulse{{ sid }}{
+    0%{ box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.45); }
+    70%{ box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100%{ box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+
+  @media (max-width: 760px){
+    .tpa-popular--{{ sid }} .tpa-popular__nav{
+      display: none;
+    }
+    .tpa-popular--{{ sid }} .tpa-card{
+      min-height: 410px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tpa-popular--{{ sid }} .tpa-card__btn{
+      transition: none;
+    }
+    .tpa-popular--{{ sid }} .tpa-card__pulse{
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  (function(){
+    var sid = {{ sid | json }};
+    var rail = document.getElementById('tpa-rail-' + sid);
+    if (!rail) return;
+
+    var prev = document.querySelector('[data-tpa-prev="'+ sid +'"]');
+    var next = document.querySelector('[data-tpa-next="'+ sid +'"]');
+
+    function scrollByAmount(dir){
+      var amt = Math.round(rail.clientWidth * 0.92);
+      rail.scrollBy({ left: dir * amt, behavior: 'smooth' });
+    }
+
+    function updateButtons(){
+      if (!prev || !next) return;
+      var max = rail.scrollWidth - rail.clientWidth - 2;
+      prev.disabled = rail.scrollLeft <= 2;
+      next.disabled = rail.scrollLeft >= max;
+    }
+
+    if (prev) prev.addEventListener('click', function(){ scrollByAmount(-1); });
+    if (next) next.addEventListener('click', function(){ scrollByAmount(1); });
+
+    rail.addEventListener('scroll', function(){ window.requestAnimationFrame(updateButtons); }, { passive: true });
+    window.addEventListener('resize', updateButtons);
+    updateButtons();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TPA Popular Parts",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Australia's Most Popular Parts"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Trusted by thousands. Every part verified for a perfect fit."
+    },
+    {
+      "type": "text",
+      "id": "fit_text",
+      "label": "Fit line text",
+      "default": "Perfect Fit"
+    },
+    {
+      "type": "text",
+      "id": "urgency_text",
+      "label": "Urgency line",
+      "default": "Selling fast. Add to cart before it sells out."
+    },
+    {
+      "type": "text",
+      "id": "add_label",
+      "label": "Add button label",
+      "default": "Add"
+    },
+    {
+      "type": "text",
+      "id": "sold_out_label",
+      "label": "Sold out label",
+      "default": "Sold out"
+    },
+    {
+      "type": "color",
+      "id": "header_bg",
+      "label": "Header background",
+      "default": "#EEF2F7"
+    },
+    {
+      "type": "color",
+      "id": "cta_bg",
+      "label": "Add button background",
+      "default": "#1D5BFF"
+    },
+    {
+      "type": "color",
+      "id": "cta_fg",
+      "label": "Add button text",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "full-width"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 44
+    }
+  ],
+  "blocks": [
+    {
+      "type": "product",
+      "name": "Product card",
+      "settings": [
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        },
+        {
+          "type": "text",
+          "id": "badge_text",
+          "label": "Badge text",
+          "default": "Top Pick"
+        },
+        {
+          "type": "color",
+          "id": "badge_bg",
+          "label": "Badge background",
+          "default": "#1D5BFF"
+        },
+        {
+          "type": "color",
+          "id": "badge_fg",
+          "label": "Badge text color",
+          "default": "#FFFFFF"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 12,
+  "presets": [
+    {
+      "name": "TPA Popular Parts",
+      "blocks": [
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" },
+        { "type": "product" }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,602 @@
+{% comment %}
+  Section: TPA Social Proof Carousel
+  Matches screenshot style. Adds carousel with arrows + scroll-snap.
+  Blocks are reviews. Add as many as you want.
+{% endcomment %}
+
+{% assign sid = section.id %}
+
+<section class="tpa-reviews tpa-reviews--{{ sid }} color-{{ section.settings.color_scheme }}">
+  <div class="tpa-reviews__inner {% if section.settings.section_width == 'full-width' %}tpa-reviews__inner--full{% endif %}">
+    <header class="tpa-reviews__header">
+      <h2 class="tpa-reviews__title">{{ section.settings.heading }}</h2>
+      {% if section.settings.subheading != blank %}
+        <p class="tpa-reviews__subtitle">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </header>
+
+    <div class="tpa-reviews__rail-wrap">
+      <button class="tpa-reviews__nav tpa-reviews__nav--prev" type="button" aria-label="Previous reviews" data-tpa-prev="{{ sid }}">‹</button>
+
+      <div class="tpa-reviews__rail" id="tpa-reviews-rail-{{ sid }}">
+        {% for block in section.blocks %}
+          <article class="tpa-review" {{ block.shopify_attributes }}>
+            <div class="tpa-review__stars" aria-label="{{ block.settings.stars }} out of 5 stars">
+              {% assign s = block.settings.stars | plus: 0 %}
+              {% for i in (1..5) %}
+                <span class="tpa-star{% if i <= s %} is-on{% endif %}" aria-hidden="true">★</span>
+              {% endfor %}
+            </div>
+
+            <div class="tpa-review__quote">
+              “{{ block.settings.quote }}”
+            </div>
+
+            <div class="tpa-review__footer">
+              <div class="tpa-review__person">
+                <div class="tpa-review__name">{{ block.settings.name }}</div>
+                <div class="tpa-review__loc">{{ block.settings.location }}</div>
+              </div>
+
+              {% if block.settings.verified %}
+                <div class="tpa-review__verified">
+                  <span class="tpa-review__badge" aria-hidden="true">✓</span>
+                  <span>Verified</span>
+                </div>
+              {% endif %}
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      <button class="tpa-reviews__nav tpa-reviews__nav--next" type="button" aria-label="Next reviews" data-tpa-next="{{ sid }}">›</button>
+    </div>
+
+    {% if section.settings.stats_enable %}
+      <div class="tpa-reviews__stats">
+        <div class="tpa-stat">
+          <div class="tpa-stat__num">{{ section.settings.stat_1_num }}</div>
+          <div class="tpa-stat__label">{{ section.settings.stat_1_label }}</div>
+        </div>
+        <div class="tpa-stat">
+          <div class="tpa-stat__num">{{ section.settings.stat_2_num }}</div>
+          <div class="tpa-stat__label">{{ section.settings.stat_2_label }}</div>
+        </div>
+        <div class="tpa-stat">
+          <div class="tpa-stat__num">{{ section.settings.stat_3_num }}</div>
+          <div class="tpa-stat__label">{{ section.settings.stat_3_label }}</div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if section.settings.cta_enable %}
+      <div class="tpa-reviews__cta">
+        {% if section.settings.cta_primary_label != blank %}
+          <a class="tpa-reviews__btn tpa-reviews__btn--primary" href="{{ section.settings.cta_primary_link | default: routes.all_products_collection_url }}">
+            {{ section.settings.cta_primary_label }}
+            <span aria-hidden="true">→</span>
+          </a>
+        {% endif %}
+
+        {% if section.settings.cta_secondary_label != blank %}
+          <a class="tpa-reviews__btn tpa-reviews__btn--secondary" href="{{ section.settings.cta_secondary_link | default: routes.all_products_collection_url }}">
+            {{ section.settings.cta_secondary_label }}
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<style>
+  .tpa-reviews--{{ sid }}{
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    background: {{ section.settings.bg }};
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__inner{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__inner--full{
+    max-width: none;
+    padding: 0 32px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__header{
+    text-align: center;
+    margin-bottom: 26px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__title{
+    margin: 0;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    font-size: clamp(32px, 4.2vw, 54px);
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__subtitle{
+    margin: 10px auto 0;
+    max-width: 760px;
+    font-size: 16px;
+    line-height: 1.55;
+    color: rgba(var(--color-foreground), 0.70);
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__rail-wrap{
+    position: relative;
+    padding: 10px 0 4px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__rail{
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(320px, 1fr);
+    gap: 18px;
+    overflow-x: auto;
+    padding: 12px 6px 18px;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 6px;
+    scrollbar-width: none;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__rail::-webkit-scrollbar{ display:none; }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__nav{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 44px;
+    height: 44px;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: rgba(255,255,255,0.92);
+    box-shadow: 0 10px 24px rgba(2, 6, 23, 0.12);
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__nav--prev{ left: -6px; }
+  .tpa-reviews--{{ sid }} .tpa-reviews__nav--next{ right: -6px; }
+
+  .tpa-reviews--{{ sid }} .tpa-review{
+    scroll-snap-align: start;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.96);
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.10),
+      0 4px 14px rgba(2, 6, 23, 0.06);
+    padding: 20px 22px;
+    min-height: 190px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-review__stars{
+    display: inline-flex;
+    gap: 3px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-star{
+    font-size: 16px;
+    line-height: 1;
+    color: rgba(245, 158, 11, 0.35);
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-star.is-on{
+    color: rgba(245, 158, 11, 0.95);
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-review__quote{
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(var(--color-foreground), 0.80);
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-review__footer{
+    margin-top: auto;
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-review__name{
+    font-weight: 900;
+    font-size: 13px;
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-review__loc{
+    font-size: 12px;
+    color: rgba(var(--color-foreground), 0.60);
+    margin-top: 3px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-review__verified{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 900;
+    font-size: 12px;
+    color: {{ section.settings.accent }};
+    white-space: nowrap;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-review__badge{
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29, 91, 255, 0.10);
+    border: 1px solid rgba(29, 91, 255, 0.22);
+    font-size: 12px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__stats{
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-stat{
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.70);
+    padding: 14px 16px;
+    text-align: center;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-stat__num{
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: 18px;
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-stat__label{
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(var(--color-foreground), 0.65);
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__cta{
+    margin-top: 22px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__btn{
+    height: 48px;
+    padding: 0 18px;
+    border-radius: 14px;
+    font-weight: 950;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: transform 140ms ease, opacity 140ms ease, border-color 140ms ease;
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__btn:active{ transform: translateY(1px); }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__btn--primary{
+    background: {{ section.settings.cta_bg }};
+    color: {{ section.settings.cta_fg }};
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow: 0 14px 30px rgba(2, 6, 23, 0.18);
+  }
+
+  .tpa-reviews--{{ sid }} .tpa-reviews__btn--secondary{
+    background: rgba(255,255,255,0.85);
+    color: rgb(var(--color-foreground));
+    border: 1px solid rgba(15, 23, 42, 0.10);
+  }
+
+  @media (max-width: 760px){
+    .tpa-reviews--{{ sid }} .tpa-reviews__nav{ display:none; }
+    .tpa-reviews--{{ sid }} .tpa-reviews__stats{ grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tpa-reviews--{{ sid }} .tpa-reviews__btn{ transition: none; }
+  }
+</style>
+
+<script>
+  (function(){
+    var sid = {{ sid | json }};
+    var rail = document.getElementById('tpa-reviews-rail-' + sid);
+    if (!rail) return;
+
+    var prev = document.querySelector('[data-tpa-prev="'+ sid +'"]');
+    var next = document.querySelector('[data-tpa-next="'+ sid +'"]');
+
+    function scrollByAmount(dir){
+      var amt = Math.round(rail.clientWidth * 0.92);
+      rail.scrollBy({ left: dir * amt, behavior: 'smooth' });
+    }
+
+    function updateButtons(){
+      if (!prev || !next) return;
+      var max = rail.scrollWidth - rail.clientWidth - 2;
+      prev.disabled = rail.scrollLeft <= 2;
+      next.disabled = rail.scrollLeft >= max;
+    }
+
+    if (prev) prev.addEventListener('click', function(){ scrollByAmount(-1); });
+    if (next) next.addEventListener('click', function(){ scrollByAmount(1); });
+
+    rail.addEventListener('scroll', function(){ window.requestAnimationFrame(updateButtons); }, { passive: true });
+    window.addEventListener('resize', updateButtons);
+    updateButtons();
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TPA Social Proof Carousel",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Trusted by 50,000+ Australian Homeowners"
+    },
+    {
+      "type": "text",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Real customers. Real results. Fast shipping across Australia."
+    },
+    {
+      "type": "color",
+      "id": "bg",
+      "label": "Section background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "label": "Accent blue",
+      "default": "#1D5BFF"
+    },
+    {
+      "type": "header",
+      "content": "Stats row"
+    },
+    {
+      "type": "checkbox",
+      "id": "stats_enable",
+      "label": "Show stats row",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "stat_1_num",
+      "label": "Stat 1 number",
+      "default": "50,000+"
+    },
+    {
+      "type": "text",
+      "id": "stat_1_label",
+      "label": "Stat 1 label",
+      "default": "Parts sold"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_num",
+      "label": "Stat 2 number",
+      "default": "4.8/5"
+    },
+    {
+      "type": "text",
+      "id": "stat_2_label",
+      "label": "Stat 2 label",
+      "default": "Average rating"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_num",
+      "label": "Stat 3 number",
+      "default": "2 min"
+    },
+    {
+      "type": "text",
+      "id": "stat_3_label",
+      "label": "Stat 3 label",
+      "default": "Typical install time"
+    },
+    {
+      "type": "header",
+      "content": "CTA row"
+    },
+    {
+      "type": "checkbox",
+      "id": "cta_enable",
+      "label": "Show CTAs",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "cta_primary_label",
+      "label": "Primary CTA label",
+      "default": "Find Your Part"
+    },
+    {
+      "type": "url",
+      "id": "cta_primary_link",
+      "label": "Primary CTA link"
+    },
+    {
+      "type": "text",
+      "id": "cta_secondary_label",
+      "label": "Secondary CTA label",
+      "default": "View Best Sellers"
+    },
+    {
+      "type": "url",
+      "id": "cta_secondary_link",
+      "label": "Secondary CTA link"
+    },
+    {
+      "type": "color",
+      "id": "cta_bg",
+      "label": "Primary CTA background",
+      "default": "#1D5BFF"
+    },
+    {
+      "type": "color",
+      "id": "cta_fg",
+      "label": "Primary CTA text",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "default": 72
+    }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        {
+          "type": "range",
+          "id": "stars",
+          "label": "Stars",
+          "min": 1,
+          "max": 5,
+          "step": 1,
+          "default": 5
+        },
+        {
+          "type": "textarea",
+          "id": "quote",
+          "label": "Quote",
+          "default": "Fit my Dyson perfectly, took 2 minutes to install. Vacuum works like new again."
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "Sarah M."
+        },
+        {
+          "type": "text",
+          "id": "location",
+          "label": "Location",
+          "default": "Melbourne, VIC"
+        },
+        {
+          "type": "checkbox",
+          "id": "verified",
+          "label": "Verified badge",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "max_blocks": 30,
+  "presets": [
+    {
+      "name": "TPA Social Proof Carousel",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "Fit my Dyson V10 perfectly, took 2 minutes to install. Vacuum works like new again. Wish I'd found this site sooner.",
+            "name": "Sarah M.",
+            "location": "Melbourne, VIC",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "The Thermomix blade was identical to the original. My TM6 is blending perfectly again. Fast shipping to Sydney too.",
+            "name": "James T.",
+            "location": "Sydney, NSW",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "Breville descaler kit arrived next day. My Barista Express is pulling shots like day one. Great value bundle pricing.",
+            "name": "Michelle K.",
+            "location": "Brisbane, QLD",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "Ecovacs filters and brushes fit perfectly. Robot vacuum is back to full suction. Clear model guide made it easy.",
+            "name": "Tom R.",
+            "location": "Perth, WA",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "quote": "Ordered at night, shipped next morning. Part arrived fast and the install video saved me a repair call-out.",
+            "name": "Nina P.",
+            "location": "Adelaide, SA",
+            "verified": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

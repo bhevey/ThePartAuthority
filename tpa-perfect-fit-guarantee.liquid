@@ -1,0 +1,341 @@
+{% comment %}
+  Section: TPA Perfect Fit Guarantee
+  Matches screenshot: pill, big headline with blue accent word, 3 feature cards, bold closing line.
+{% endcomment %}
+
+{% assign sid = section.id %}
+
+<section class="tpa-guarantee tpa-guarantee--{{ sid }} color-{{ section.settings.color_scheme }}">
+  <div class="tpa-guarantee__inner {% if section.settings.section_width == 'full-width' %}tpa-guarantee__inner--full{% endif %}">
+    <header class="tpa-guarantee__header">
+      {% if section.settings.pill_text != blank %}
+        <div class="tpa-guarantee__pill">{{ section.settings.pill_text }}</div>
+      {% endif %}
+
+      <h2 class="tpa-guarantee__title">
+        {{ section.settings.heading_before }}
+        <span class="tpa-guarantee__accent">{{ section.settings.heading_accent }}</span>
+        {{ section.settings.heading_after }}
+      </h2>
+    </header>
+
+    <div class="tpa-guarantee__grid">
+      {% for block in section.blocks %}
+        <div class="tpa-guarantee__item" {{ block.shopify_attributes }}>
+          <div class="tpa-guarantee__icon">
+            {% if block.settings.icon_image != blank %}
+              <img
+                src="{{ block.settings.icon_image | image_url: width: 160 }}"
+                alt=""
+                loading="lazy"
+                width="44"
+                height="44"
+              >
+            {% else %}
+              <span class="tpa-guarantee__glyph" aria-hidden="true">{{ block.settings.fallback_icon }}</span>
+            {% endif %}
+          </div>
+
+          <h3 class="tpa-guarantee__item-title">{{ block.settings.title }}</h3>
+          <p class="tpa-guarantee__item-desc">{{ block.settings.description }}</p>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="tpa-guarantee__footer">
+      <div class="tpa-guarantee__footer-text">
+        {{ section.settings.footer_before }}
+        <span class="tpa-guarantee__accent">{{ section.settings.footer_accent }}</span>
+        {{ section.settings.footer_after }}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .tpa-guarantee--{{ sid }}{
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+    background: {{ section.settings.bg }};
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__inner{
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__inner--full{
+    max-width: none;
+    padding: 0 32px;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__header{
+    text-align: center;
+    padding-top: 18px;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__pill{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.10);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    color: rgba(6, 95, 70, 0.95);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__title{
+    margin: 18px 0 0;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    font-size: clamp(38px, 4.8vw, 62px);
+    color: rgb(var(--color-foreground));
+    line-height: 1.05;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__accent{
+    color: {{ section.settings.accent }};
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__grid{
+    margin-top: 46px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 44px;
+    align-items: start;
+    text-align: center;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__item{
+    padding: 0 10px;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__icon{
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    margin: 0 auto 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29, 91, 255, 0.06);
+    border: 1px solid rgba(29, 91, 255, 0.10);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__icon img{
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__glyph{
+    font-size: 30px;
+    line-height: 1;
+    color: {{ section.settings.accent }};
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__item-title{
+    margin: 10px 0 0;
+    font-size: 18px;
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__item-desc{
+    margin: 10px auto 0;
+    max-width: 280px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: rgba(var(--color-foreground), 0.72);
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__footer{
+    margin-top: 54px;
+    text-align: center;
+  }
+
+  .tpa-guarantee--{{ sid }} .tpa-guarantee__footer-text{
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: clamp(24px, 3vw, 38px);
+    color: rgb(var(--color-foreground));
+  }
+
+  @media (max-width: 900px){
+    .tpa-guarantee--{{ sid }} .tpa-guarantee__grid{
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .tpa-guarantee--{{ sid }} .tpa-guarantee__item-desc{
+      max-width: 520px;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TPA Perfect Fit Guarantee",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "pill_text",
+      "label": "Pill text",
+      "default": "ZERO RISK"
+    },
+    {
+      "type": "text",
+      "id": "heading_before",
+      "label": "Heading (before accent)",
+      "default": "The "
+    },
+    {
+      "type": "text",
+      "id": "heading_accent",
+      "label": "Heading (accent word)",
+      "default": "Perfect Fit"
+    },
+    {
+      "type": "text",
+      "id": "heading_after",
+      "label": "Heading (after accent)",
+      "default": " Guarantee"
+    },
+    {
+      "type": "text",
+      "id": "footer_before",
+      "label": "Footer (before accent)",
+      "default": "We don't sell parts that don't fit. "
+    },
+    {
+      "type": "text",
+      "id": "footer_accent",
+      "label": "Footer (accent word)",
+      "default": "Period."
+    },
+    {
+      "type": "text",
+      "id": "footer_after",
+      "label": "Footer (after accent)",
+      "default": "-"
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "label": "Accent blue",
+      "default": "#1D5BFF"
+    },
+    {
+      "type": "color",
+      "id": "bg",
+      "label": "Section background",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "default": 72
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 140,
+      "step": 4,
+      "default": 76
+    }
+  ],
+  "blocks": [
+    {
+      "type": "feature",
+      "name": "Feature",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon image (optional)"
+        },
+        {
+          "type": "text",
+          "id": "fallback_icon",
+          "label": "Fallback icon (emoji)",
+          "default": "🛡️"
+        },
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Guaranteed Compatible"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "Every part is verified to fit your exact model. No guesswork."
+        }
+      ]
+    }
+  ],
+  "max_blocks": 6,
+  "presets": [
+    {
+      "name": "TPA Perfect Fit Guarantee",
+      "blocks": [
+        {
+          "type": "feature",
+          "settings": {
+            "fallback_icon": "🛡️",
+            "title": "Guaranteed Compatible",
+            "description": "Every part is verified to fit your exact model. No guesswork."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "fallback_icon": "↩️",
+            "title": "Free Returns",
+            "description": "Wrong part? We'll make it right. No questions asked."
+          }
+        },
+        {
+          "type": "feature",
+          "settings": {
+            "fallback_icon": "🎧",
+            "title": "Expert Support",
+            "description": "Not sure which part? Our team will confirm before you buy."
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

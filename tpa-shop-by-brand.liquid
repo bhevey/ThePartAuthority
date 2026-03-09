@@ -1,0 +1,411 @@
+{% comment %}
+  Section: TPA Shop by Brand (CSS enhanced)
+  Creates 5 cards: Dyson, Thermomix, Breville, Ecovacs, Appliances.
+{% endcomment %}
+
+<section class="tpa-brands tpa-brands--{{ section.id }} color-{{ section.settings.color_scheme }}">
+  <div class="tpa-brands__inner {% if section.settings.section_width == 'full-width' %}tpa-brands__inner--full{% endif %}">
+    <header class="tpa-brands__header">
+      {% if section.settings.heading != blank %}
+        <h2 class="tpa-brands__title">{{ section.settings.heading }}</h2>
+      {% endif %}
+      {% if section.settings.subheading != blank %}
+        <p class="tpa-brands__subtitle">{{ section.settings.subheading }}</p>
+      {% endif %}
+    </header>
+
+    <div class="tpa-brands__grid">
+      {% for block in section.blocks %}
+        <a
+          class="tpa-brand-card"
+          href="{{ block.settings.link | default: routes.all_products_collection_url }}"
+          {{ block.shopify_attributes }}
+          style="--accent: {{ block.settings.accent | default: section.settings.accent_color }};"
+        >
+          <div class="tpa-brand-card__icon">
+            {% if block.settings.icon_image != blank %}
+              <img
+                src="{{ block.settings.icon_image | image_url: width: 160 }}"
+                alt="{{ block.settings.title | escape }}"
+                loading="lazy"
+                width="72"
+                height="72"
+              >
+            {% else %}
+              <span class="tpa-brand-card__glyph" aria-hidden="true">{{ block.settings.fallback_icon }}</span>
+            {% endif %}
+          </div>
+
+          <div class="tpa-brand-card__body">
+            <h3 class="tpa-brand-card__title">{{ block.settings.title }}</h3>
+
+            {% if block.settings.kicker != blank %}
+              <div class="tpa-brand-card__kicker">{{ block.settings.kicker }}</div>
+            {% endif %}
+
+            {% if block.settings.description != blank %}
+              <p class="tpa-brand-card__desc">{{ block.settings.description }}</p>
+            {% endif %}
+          </div>
+
+          <div class="tpa-brand-card__cta">
+            <span>{{ block.settings.cta_label }}</span>
+            <span class="tpa-brand-card__arrow" aria-hidden="true">→</span>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+  .tpa-brands--{{ section.id }}{
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brands__inner{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brands__inner--full{
+    max-width: none;
+    padding: 0 32px;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brands__header{
+    text-align: center;
+    margin-bottom: 34px;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brands__title{
+    margin: 0;
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    font-size: clamp(34px, 4.2vw, 56px);
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brands__subtitle{
+    margin: 12px auto 0;
+    max-width: 640px;
+    font-size: 18px;
+    line-height: 1.5;
+    color: rgba(var(--color-foreground), 0.72);
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brands__grid{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 26px;
+    align-items: stretch;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 28px 28px 22px;
+    border-radius: 18px;
+    text-decoration: none;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.92);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.10),
+      0 4px 14px rgba(2, 6, 23, 0.06);
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+    min-height: 340px;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card:hover{
+    transform: translateY(-3px);
+    border-color: rgba(29, 91, 255, 0.25);
+    box-shadow:
+      0 24px 60px rgba(2, 6, 23, 0.12),
+      0 8px 22px rgba(2, 6, 23, 0.10);
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card:focus-visible{
+    outline: 3px solid rgba(29, 91, 255, 0.35);
+    outline-offset: 3px;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__icon{
+    width: 66px;
+    height: 66px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(15, 23, 42, 0.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__icon img{
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__glyph{
+    font-size: 26px;
+    line-height: 1;
+    color: rgba(15, 23, 42, 0.85);
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__body{
+    margin-top: 18px;
+    flex: 1;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__title{
+    margin: 0;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__kicker{
+    margin-top: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--accent);
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__desc{
+    margin: 12px 0 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(var(--color-foreground), 0.72);
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__cta{
+    margin-top: 18px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(15, 23, 42, 0.10);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    font-weight: 900;
+    color: var(--accent);
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card__arrow{
+    font-size: 18px;
+    line-height: 1;
+    transition: transform 180ms ease;
+  }
+
+  .tpa-brands--{{ section.id }} .tpa-brand-card:hover .tpa-brand-card__arrow{
+    transform: translateX(3px);
+  }
+
+  @media (max-width: 980px){
+    .tpa-brands--{{ section.id }} .tpa-brands__grid{
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .tpa-brands--{{ section.id }} .tpa-brand-card{
+      min-height: 320px;
+    }
+  }
+
+  @media (max-width: 620px){
+    .tpa-brands--{{ section.id }} .tpa-brands__grid{
+      grid-template-columns: 1fr;
+    }
+    .tpa-brands--{{ section.id }} .tpa-brand-card{
+      padding: 22px 20px 18px;
+      min-height: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tpa-brands--{{ section.id }} .tpa-brand-card,
+    .tpa-brands--{{ section.id }} .tpa-brand-card__arrow{
+      transition: none;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TPA Shop by Brand",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Shop by Brand"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Subheading",
+      "default": "Select your appliance brand to find guaranteed-compatible parts."
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Default accent",
+      "default": "#1D5BFF"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 36
+    }
+  ],
+  "blocks": [
+    {
+      "type": "brand",
+      "name": "Brand card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "Dyson"
+        },
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Blue line",
+          "default": "Vacuums: Filters & Rollers"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "HEPA filters, brush rollers, and accessories for V7 through V15 and beyond."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "Shop Dyson Parts"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon image (optional)"
+        },
+        {
+          "type": "text",
+          "id": "fallback_icon",
+          "label": "Fallback icon (emoji)",
+          "default": "🌀"
+        },
+        {
+          "type": "color",
+          "id": "accent",
+          "label": "Accent (optional)",
+          "default": "#1D5BFF"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 8,
+  "presets": [
+    {
+      "name": "TPA Shop by Brand",
+      "blocks": [
+        {
+          "type": "brand",
+          "settings": {
+            "title": "Dyson",
+            "kicker": "Vacuums: Filters & Rollers",
+            "description": "HEPA filters, brush rollers, and accessories for V7 through V15 and beyond.",
+            "cta_label": "Shop Dyson Parts",
+            "fallback_icon": "🌀",
+            "accent": "#1D5BFF"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "title": "Thermomix",
+            "kicker": "TM5 & TM6: Blades & Accessories",
+            "description": "Precision blades, sealing rings, mixing bowls, and more for your Thermomix.",
+            "cta_label": "Shop Thermomix Parts",
+            "fallback_icon": "🧑‍🍳",
+            "accent": "#1D5BFF"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "title": "Breville",
+            "kicker": "Espresso: Filters & Cleaning",
+            "description": "Portafilter baskets, cleaning tablets, water filters, and descaling solutions.",
+            "cta_label": "Shop Breville Parts",
+            "fallback_icon": "☕",
+            "accent": "#1D5BFF"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "title": "Ecovacs",
+            "kicker": "Robot Vacuums: Brushes & Filters",
+            "description": "Main brushes, side brushes, mop pads, and filters for popular Deebot models.",
+            "cta_label": "Shop Ecovacs Parts",
+            "fallback_icon": "🤖",
+            "accent": "#1D5BFF"
+          }
+        },
+        {
+          "type": "brand",
+          "settings": {
+            "title": "Appliances",
+            "kicker": "Premium, Affordable Appliances",
+            "description": "Quality appliances backed by clear specs, fast shipping, and local support.",
+            "cta_label": "Shop Appliances",
+            "fallback_icon": "🏠",
+            "accent": "#1D5BFF"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,335 @@
+{% comment %}
+  Section: TPA Footer Links (custom)
+  Matches screenshot: dark gradient, 4 columns, divider, copyright left, small badges right.
+{% endcomment %}
+
+{% assign sid = section.id %}
+
+<footer class="tpa-footer tpa-footer--{{ sid }} color-{{ section.settings.color_scheme }}">
+  <div class="tpa-footer__inner {% if section.settings.section_width == 'full-width' %}tpa-footer__inner--full{% endif %}">
+    <div class="tpa-footer__top">
+      <div class="tpa-footer__col tpa-footer__brand">
+        <div class="tpa-footer__logo">
+          <span class="tpa-footer__logo-strong">{{ section.settings.brand_name_strong }}</span>
+          <span class="tpa-footer__logo-accent">{{ section.settings.brand_name_accent }}</span>
+        </div>
+        <p class="tpa-footer__blurb">{{ section.settings.blurb }}</p>
+      </div>
+
+      <div class="tpa-footer__col">
+        <div class="tpa-footer__heading">{{ section.settings.col1_title }}</div>
+        <nav class="tpa-footer__links" aria-label="{{ section.settings.col1_title }}">
+          {% for link in linklists[section.settings.col1_menu].links %}
+            <a class="tpa-footer__link" href="{{ link.url }}">{{ link.title }}</a>
+          {% endfor %}
+        </nav>
+      </div>
+
+      <div class="tpa-footer__col">
+        <div class="tpa-footer__heading">{{ section.settings.col2_title }}</div>
+        <nav class="tpa-footer__links" aria-label="{{ section.settings.col2_title }}">
+          {% for link in linklists[section.settings.col2_menu].links %}
+            <a class="tpa-footer__link" href="{{ link.url }}">{{ link.title }}</a>
+          {% endfor %}
+        </nav>
+      </div>
+
+      <div class="tpa-footer__col">
+        <div class="tpa-footer__heading">{{ section.settings.col3_title }}</div>
+        <nav class="tpa-footer__links" aria-label="{{ section.settings.col3_title }}">
+          {% for link in linklists[section.settings.col3_menu].links %}
+            <a class="tpa-footer__link" href="{{ link.url }}">{{ link.title }}</a>
+          {% endfor %}
+        </nav>
+      </div>
+    </div>
+
+    <div class="tpa-footer__divider" role="presentation"></div>
+
+    <div class="tpa-footer__bottom">
+      <div class="tpa-footer__copy">
+        © {{ 'now' | date: '%Y' }} {{ section.settings.copyright_text }}
+      </div>
+
+      <div class="tpa-footer__badges" aria-label="Footer badges">
+        {% if section.settings.badge1_text != blank %}
+          <div class="tpa-footer__badge">
+            <span class="tpa-footer__badge-ic" aria-hidden="true">{{ section.settings.badge1_icon }}</span>
+            <span>{{ section.settings.badge1_text }}</span>
+          </div>
+        {% endif %}
+        {% if section.settings.badge2_text != blank %}
+          <div class="tpa-footer__badge">
+            <span class="tpa-footer__badge-ic" aria-hidden="true">{{ section.settings.badge2_icon }}</span>
+            <span>{{ section.settings.badge2_text }}</span>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .tpa-footer--{{ sid }}{
+    background:
+      radial-gradient(1100px 640px at 20% 20%, rgba(29,91,255,0.35), rgba(0,0,0,0) 60%),
+      linear-gradient(135deg, {{ section.settings.bg_1 }}, {{ section.settings.bg_2 }});
+    color: rgba(255,255,255,0.86);
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__inner{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 42px 24px 26px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__inner--full{
+    max-width: none;
+    padding: 42px 32px 26px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__top{
+    display: grid;
+    grid-template-columns: 1.2fr 1fr 1fr 1fr;
+    gap: 34px;
+    align-items: start;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__logo{
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: 14px;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.92);
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__logo-accent{
+    color: {{ section.settings.accent }};
+    margin-left: 6px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__blurb{
+    margin: 14px 0 0;
+    max-width: 320px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.62);
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__heading{
+    font-size: 12px;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.84);
+    margin-bottom: 14px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__links{
+    display: grid;
+    gap: 10px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__link{
+    font-size: 13px;
+    text-decoration: none;
+    color: rgba(255,255,255,0.70);
+    width: fit-content;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__link:hover{
+    color: rgba(255,255,255,0.92);
+    text-decoration: underline;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__divider{
+    height: 1px;
+    background: rgba(255,255,255,0.10);
+    margin: 28px 0 18px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__bottom{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__copy{
+    font-size: 12px;
+    color: rgba(255,255,255,0.46);
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__badges{
+    display: inline-flex;
+    gap: 18px;
+    align-items: center;
+    color: rgba(255,255,255,0.70);
+    font-size: 12px;
+    font-weight: 850;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__badge{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .tpa-footer--{{ sid }} .tpa-footer__badge-ic{
+    opacity: 0.9;
+  }
+
+  @media (max-width: 980px){
+    .tpa-footer--{{ sid }} .tpa-footer__top{
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 640px){
+    .tpa-footer--{{ sid }} .tpa-footer__top{
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+
+    .tpa-footer--{{ sid }} .tpa-footer__bottom{
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+</style>
+
+{% schema %}
+{
+  "name": "TPA Footer Links",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "color",
+      "id": "bg_1",
+      "label": "Background 1",
+      "default": "#06122C"
+    },
+    {
+      "type": "color",
+      "id": "bg_2",
+      "label": "Background 2",
+      "default": "#071A3A"
+    },
+    {
+      "type": "color",
+      "id": "accent",
+      "label": "Accent",
+      "default": "#1D5BFF"
+    },
+    {
+      "type": "text",
+      "id": "brand_name_strong",
+      "label": "Brand name (strong)",
+      "default": "THE PART"
+    },
+    {
+      "type": "text",
+      "id": "brand_name_accent",
+      "label": "Brand name (accent)",
+      "default": "AUTHORITY"
+    },
+    {
+      "type": "textarea",
+      "id": "blurb",
+      "label": "Blurb",
+      "default": "Australia's trusted specialist for premium aftermarket appliance replacement parts."
+    },
+    {
+      "type": "header",
+      "content": "Columns"
+    },
+    {
+      "type": "text",
+      "id": "col1_title",
+      "label": "Column 1 title",
+      "default": "Shop"
+    },
+    {
+      "type": "link_list",
+      "id": "col1_menu",
+      "label": "Column 1 menu"
+    },
+    {
+      "type": "text",
+      "id": "col2_title",
+      "label": "Column 2 title",
+      "default": "Support"
+    },
+    {
+      "type": "link_list",
+      "id": "col2_menu",
+      "label": "Column 2 menu"
+    },
+    {
+      "type": "text",
+      "id": "col3_title",
+      "label": "Column 3 title",
+      "default": "About"
+    },
+    {
+      "type": "link_list",
+      "id": "col3_menu",
+      "label": "Column 3 menu"
+    },
+    {
+      "type": "header",
+      "content": "Bottom row"
+    },
+    {
+      "type": "text",
+      "id": "copyright_text",
+      "label": "Copyright text",
+      "default": "The Part Authority — Australia’s Trusted Parts Specialist"
+    },
+    {
+      "type": "text",
+      "id": "badge1_icon",
+      "label": "Badge 1 icon",
+      "default": "🚚"
+    },
+    {
+      "type": "text",
+      "id": "badge1_text",
+      "label": "Badge 1 text",
+      "default": "AU Shipping"
+    },
+    {
+      "type": "text",
+      "id": "badge2_icon",
+      "label": "Badge 2 icon",
+      "default": "💳"
+    },
+    {
+      "type": "text",
+      "id": "badge2_text",
+      "label": "Badge 2 text",
+      "default": "Secure Payments"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "full-width"
+    }
+  ],
+  "presets": [
+    {
+      "name": "TPA Footer Links"
+    }
+  ]
+}
+{% endschema %}
