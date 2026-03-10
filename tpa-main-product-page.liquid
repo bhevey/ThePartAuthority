@@ -8,13 +8,11 @@
 
   Optional metafields (recommended):
   - product.metafields.tpa.subheadline (single_line_text_field)
-  - product.metafields.tpa.model_suggestions (list.single_line_text_field)
+  - product.metafields.tpa.product_description (rich_text) — product description (falls back to product.description)
   - product.metafields.tpa.specs (rich_text)
-  - product.metafields.tpa.whats_included (rich_text)
   - product.metafields.tpa.warranty (single_line_text_field or rich_text)
   - product.metafields.tpa.shipping_notes (single_line_text_field or rich_text)
   - product.metafields.tpa.install_notes (single_line_text_field or rich_text)
-  - product.metafields.tpa.compatibility_note (single_line_text_field)
 {% endcomment %}
 
 {% assign sid = section.id %}
@@ -146,43 +144,6 @@
             </div>
           {% endif %}
 
-          {% if is_part %}
-            <div class="tpa-pdp__module tpa-fit" data-tpa-fit>
-              <div class="tpa-pdp__module-title">{{ section.settings.fit_title }}</div>
-              <div class="tpa-fit__row">
-                <input
-                  class="tpa-fit__input"
-                  type="text"
-                  inputmode="text"
-                  autocomplete="off"
-                  placeholder="{{ section.settings.fit_placeholder }}"
-                  data-tpa-fit-input
-                >
-                <button class="tpa-fit__btn" type="button" data-tpa-fit-check>{{ section.settings.fit_btn }}</button>
-              </div>
-
-              {% assign models = product.metafields.tpa.model_suggestions.value %}
-              {% if models != blank %}
-                <div class="tpa-fit__chips" aria-label="Suggested models">
-                  {% for m in models %}
-                    <button type="button" class="tpa-fit__chip" data-tpa-fit-chip="{{ m }}">{{ m }}</button>
-                  {% endfor %}
-                </div>
-              {% endif %}
-
-              <div class="tpa-fit__state" data-tpa-fit-state>
-                <span class="tpa-fit__dot" aria-hidden="true"></span>
-                <span data-tpa-fit-text>{{ section.settings.fit_state_default }}</span>
-              </div>
-
-              {% assign compat_note = product.metafields.tpa.compatibility_note.value %}
-              {% if compat_note == blank %}
-                {% assign compat_note = section.settings.fit_note %}
-              {% endif %}
-              <div class="tpa-fit__note">{{ compat_note }}</div>
-            </div>
-          {% endif %}
-
           {% if is_appliance %}
             <div class="tpa-pdp__module tpa-specs">
               <div class="tpa-pdp__module-title">{{ section.settings.specs_title }}</div>
@@ -264,15 +225,6 @@
             </button>
           </div>
 
-          <div class="tpa-pdp__shipping-bar" data-tpa-shipping-bar>
-            <div class="tpa-pdp__shipping-text">
-              <span data-tpa-shipping-msg>Free shipping on orders over ${{ section.settings.free_shipping_threshold | default: 75 }}</span>
-            </div>
-            <div class="tpa-pdp__shipping-track">
-              <div class="tpa-pdp__shipping-fill" data-tpa-shipping-fill style="width: {% assign threshold = section.settings.free_shipping_threshold | default: 75 | times: 100 %}{% assign pct = price | times: 100 | divided_by: threshold %}{% if pct > 100 %}100{% else %}{{ pct }}{% endif %}%"></div>
-            </div>
-          </div>
-
           <div class="tpa-trust">
             {% if is_part %}
               <div class="tpa-trust__item">✔ {{ section.settings.trust_part_1 }}</div>
@@ -306,6 +258,17 @@
       </div>
     </div>
 
+    {% assign product_description = product.metafields.tpa.product_description.value %}
+    {% assign description_content = product_description | default: product.description %}
+    {% if description_content != blank %}
+      <div class="tpa-pdp__desc">
+        <div class="tpa-block__title">{{ section.settings.desc_title }}</div>
+        <div class="tpa-pdp__desc-body tpa-rich">
+          {{ description_content }}
+        </div>
+      </div>
+    {% endif %}
+
     <div class="tpa-pdp__mid">
       <div class="tpa-block">
         <div class="tpa-block__title">{{ section.settings.benefits_title }}</div>
@@ -322,18 +285,6 @@
             <div class="tpa-kv">{{ section.settings.benefit_app_3 }}</div>
             <div class="tpa-kv">{{ section.settings.benefit_app_4 }}</div>
             <div class="tpa-kv">{{ section.settings.benefit_app_5 }}</div>
-          {% endif %}
-        </div>
-      </div>
-
-      <div class="tpa-block">
-        <div class="tpa-block__title">{{ section.settings.included_title }}</div>
-        <div class="tpa-block__body tpa-rich">
-          {% assign included = product.metafields.tpa.whats_included.value %}
-          {% if included == blank %}
-            {{ section.settings.included_fallback }}
-          {% else %}
-            {{ included }}
           {% endif %}
         </div>
       </div>
@@ -662,79 +613,6 @@
     margin-bottom: 10px;
   }
 
-  .tpa-pdp--{{ sid }} .tpa-fit__row{
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit__input{
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    padding: 0 12px;
-    font-weight: 800;
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit__btn{
-    height: 44px;
-    border-radius: 12px;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    background: rgba(29, 91, 255, 0.95);
-    color: #fff;
-    font-weight: 950;
-    padding: 0 14px;
-    cursor: pointer;
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit__chips{
-    margin-top: 10px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit__chip{
-    height: 30px;
-    padding: 0 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    background: rgba(15, 23, 42, 0.04);
-    font-weight: 900;
-    font-size: 12px;
-    cursor: pointer;
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit__state{
-    margin-top: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 950;
-    font-size: 12px;
-    color: rgba(var(--color-foreground), 0.74);
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit__dot{
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: rgba(148, 163, 184, 0.95);
-    box-shadow: 0 0 0 6px rgba(148, 163, 184, 0.12);
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit[data-state="good"] .tpa-fit__dot{
-    background: rgba(34, 197, 94, 0.95);
-    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit[data-state="warn"] .tpa-fit__dot{
-    background: rgba(245, 158, 11, 0.95);
-    box-shadow: 0 0 0 6px rgba(245, 158, 11, 0.12);
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit[data-state="bad"] .tpa-fit__dot{
-    background: rgba(239, 68, 68, 0.95);
-    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.12);
-  }
-  .tpa-pdp--{{ sid }} .tpa-fit__note{
-    margin-top: 10px;
-    font-size: 12px;
-    line-height: 1.55;
-    color: rgba(var(--color-foreground), 0.62);
-  }
-
   .tpa-pdp--{{ sid }} .tpa-specs__grid{
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -856,48 +734,6 @@
     100%{ transform: scale(1); opacity: 1; }
   }
 
-  /* --- Free shipping progress bar --- */
-  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-bar{
-    margin-top: 14px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: rgba(29, 91, 255, 0.04);
-    border: 1px solid rgba(29, 91, 255, 0.10);
-  }
-  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-text{
-    font-size: 12px;
-    font-weight: 800;
-    color: rgba(var(--color-foreground), 0.72);
-    margin-bottom: 6px;
-  }
-  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-track{
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.08);
-    overflow: hidden;
-  }
-  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-fill{
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(29, 91, 255, 0.85), rgba(34, 197, 94, 0.90));
-    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-  }
-  .tpa-pdp--{{ sid }} .tpa-pdp__shipping-fill::after{
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-    animation: tpaShipShimmer{{ sid }} 2s ease-in-out infinite;
-  }
-  @keyframes tpaShipShimmer{{ sid }}{
-    0%{ transform: translateX(-100%); }
-    100%{ transform: translateX(100%); }
-  }
-
   .tpa-pdp--{{ sid }} .tpa-trust{
     margin-top: 14px;
     display: grid;
@@ -961,10 +797,29 @@
     flex-shrink: 0;
   }
 
+  .tpa-pdp--{{ sid }} .tpa-pdp__desc{
+    margin-top: 28px;
+    padding: 20px 24px;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.86);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__desc-body{
+    margin-top: 12px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: rgba(var(--color-foreground), 0.80);
+  }
+  .tpa-pdp--{{ sid }} .tpa-pdp__desc-body p{ margin: 0 0 12px; }
+  .tpa-pdp--{{ sid }} .tpa-pdp__desc-body p:last-child{ margin-bottom: 0; }
+
   .tpa-pdp--{{ sid }} .tpa-pdp__mid{
     margin-top: 34px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 18px;
   }
   .tpa-pdp--{{ sid }} .tpa-block{
@@ -1163,14 +1018,35 @@
       grid-template-columns: 1fr;
       gap: 18px;
     }
-    .tpa-pdp--{{ sid }} .tpa-pdp__mid{
-      grid-template-columns: 1fr;
-    }
     .tpa-pdp--{{ sid }} .tpa-pdp__qty-row{
       grid-template-columns: 1fr;
     }
     .tpa-pdp--{{ sid }} .tpa-trust{
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 767px){
+    .tpa-pdp--{{ sid }}{
+      padding: 20px 0 40px;
+    }
+    .tpa-pdp--{{ sid }} .tpa-pdp__inner{
+      padding: 0 16px;
+    }
+    .tpa-pdp--{{ sid }} .tpa-pdp__title{
+      font-size: clamp(22px, 6vw, 30px);
+    }
+    .tpa-pdp--{{ sid }} .tpa-pdp__desc{
+      padding: 16px;
+    }
+    .tpa-pdp--{{ sid }} .tpa-block{
+      padding: 14px;
+    }
+    .tpa-pdp--{{ sid }} .tpa-pdp__mid{
+      margin-top: 20px;
+    }
+    .tpa-pdp--{{ sid }} .tpa-pdp__bundles{
+      margin-top: 16px;
     }
   }
 </style>
@@ -1251,49 +1127,6 @@
       });
     }
 
-    /* --- Fit checker --- */
-    var fit = root.querySelector('[data-tpa-fit]');
-    if (fit){
-      var input = root.querySelector('[data-tpa-fit-input]');
-      var check = root.querySelector('[data-tpa-fit-check]');
-      var text = root.querySelector('[data-tpa-fit-text]');
-
-      function setState(state, label){
-        fit.setAttribute('data-state', state);
-        if (text) text.textContent = label;
-      }
-
-      function evaluate(value){
-        var v = (value || '').trim();
-        if (v.length < 3) {
-          setState('warn', {{ section.settings.fit_state_warn | json }});
-          return;
-        }
-        var chips = Array.prototype.slice.call(root.querySelectorAll('[data-tpa-fit-chip]'));
-        var match = chips.some(function(b){
-          return (b.getAttribute('data-tpa-fit-chip') || '').toLowerCase() === v.toLowerCase();
-        });
-        if (match){
-          setState('good', {{ section.settings.fit_state_good | json }});
-        } else {
-          setState('bad', {{ section.settings.fit_state_bad | json }});
-        }
-      }
-
-      if (check) check.addEventListener('click', function(){ evaluate(input.value); });
-      if (input) input.addEventListener('input', function(){ evaluate(input.value); });
-
-      root.addEventListener('click', function(e){
-        var chip = e.target.closest('.tpa-fit__chip');
-        if (!chip) return;
-        var val = chip.getAttribute('data-tpa-fit-chip') || chip.textContent;
-        if (input) input.value = val;
-        evaluate(val);
-      });
-
-      setState('warn', {{ section.settings.fit_state_default | json }});
-    }
-
     /* --- Product recommendations --- */
     var recHost = root.querySelector('[data-product-recommendations]');
     if (recHost){
@@ -1332,7 +1165,6 @@
 
     { "type": "text", "id": "atc_label", "label": "Add to cart label", "default": "Add to Cart" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold out" },
-    { "type": "range", "id": "free_shipping_threshold", "label": "Free shipping threshold ($)", "min": 25, "max": 200, "step": 5, "default": 75 },
 
     { "type": "text", "id": "part_subheadline_fallback", "label": "Part subheadline fallback", "default": "Restore performance with a verified replacement, backed by support." },
     { "type": "text", "id": "appliance_subheadline_fallback", "label": "Appliance subheadline fallback", "default": "Premium performance, quality checked, backed by Australian support." },
@@ -1348,16 +1180,6 @@
     { "type": "text", "id": "trust_app_3", "label": "Appliances trust 3", "default": "30 Day Returns" },
     { "type": "text", "id": "trust_app_4", "label": "Appliances trust 4", "default": "Australian Support" },
 
-    { "type": "header", "content": "Parts compatibility module" },
-    { "type": "text", "id": "fit_title", "label": "Fit title", "default": "Check Fit For Your Model" },
-    { "type": "text", "id": "fit_placeholder", "label": "Fit placeholder", "default": "Enter your model number" },
-    { "type": "text", "id": "fit_btn", "label": "Fit button", "default": "Check" },
-    { "type": "text", "id": "fit_state_default", "label": "Fit default state", "default": "Check Model" },
-    { "type": "text", "id": "fit_state_good", "label": "Fit verified state", "default": "Verified Compatible" },
-    { "type": "text", "id": "fit_state_warn", "label": "Fit warn state", "default": "Check Model" },
-    { "type": "text", "id": "fit_state_bad", "label": "Fit contact state", "default": "Contact Support To Confirm" },
-    { "type": "text", "id": "fit_note", "label": "Fit note", "default": "Our team confirms compatibility before dispatch if required." },
-
     { "type": "header", "content": "Appliance value block" },
     { "type": "text", "id": "specs_title", "label": "Specs title", "default": "Key Specifications" },
     { "type": "text", "id": "specs_warranty_label", "label": "Warranty label", "default": "Warranty" },
@@ -1369,7 +1191,10 @@
     { "type": "text", "id": "specs_key_label", "label": "Key label", "default": "Details" },
     { "type": "richtext", "id": "specs_key_fallback", "label": "Specs fallback", "default": "<p>Add key specs in product metafields for a premium layout.</p>" },
 
-    { "type": "header", "content": "Benefits and included" },
+    { "type": "header", "content": "Product description" },
+    { "type": "text", "id": "desc_title", "label": "Description section title", "default": "Product Description" },
+
+    { "type": "header", "content": "Benefits" },
     { "type": "text", "id": "benefits_title", "label": "Benefits title", "default": "Benefits" },
 
     { "type": "text", "id": "benefit_part_1", "label": "Part benefit 1", "default": "Restores performance" },
@@ -1383,9 +1208,6 @@
     { "type": "text", "id": "benefit_app_3", "label": "Appliance benefit 3", "default": "Efficient operation" },
     { "type": "text", "id": "benefit_app_4", "label": "Appliance benefit 4", "default": "Warranty backed" },
     { "type": "text", "id": "benefit_app_5", "label": "Appliance benefit 5", "default": "Support when you need it" },
-
-    { "type": "text", "id": "included_title", "label": "What's included title", "default": "What’s Included" },
-    { "type": "richtext", "id": "included_fallback", "label": "Included fallback", "default": "<p>Set the “What’s included” metafield for exact contents.</p>" },
 
     { "type": "header", "content": "Bundles and recommendations" },
     { "type": "text", "id": "bundles_title", "label": "Bundles title", "default": "Frequently Bought Together" },
@@ -1406,7 +1228,7 @@
     { "type": "text", "id": "faq_title", "label": "FAQ title", "default": "FAQs" },
 
     { "type": "text", "id": "faq_part_q1", "label": "Parts Q1", "default": "How do I confirm compatibility?" },
-    { "type": "text", "id": "faq_part_a1", "label": "Parts A1", "default": "Use the model check above. If unsure, contact support. We confirm before dispatch if required." },
+    { "type": "text", "id": "faq_part_a1", "label": "Parts A1", "default": "Contact our support team to confirm compatibility. We verify before dispatch so you always receive the right part." },
     { "type": "text", "id": "faq_part_q2", "label": "Parts Q2", "default": "How long does install take?" },
     { "type": "text", "id": "faq_part_a2", "label": "Parts A2", "default": "Most installs take minutes. If you want guidance, contact support with your model." },
     { "type": "text", "id": "faq_part_q3", "label": "Parts Q3", "default": "What is your returns policy?" },

@@ -6,25 +6,23 @@
 
   Structure (conversion-optimized flow):
   1. Urgency announcement bar
-  2. Product hero (media + info + trust strip)
+  2. Product hero (media + info + trust strip) — MOBILE STACKED
   3. Social proof counter bar
-  4. Fit checker / Specs (Part vs Appliance)
+  4. Product Description
   5. Risk reversal guarantee strip
   6. Benefits grid
-  7. What's Included
-  8. Inline reviews
-  9. FAQ (objection handling)
+  7. Inline reviews
+  8. FAQ (objection handling)
+  9. Final CTA banner
   10. Persistent sticky mobile CTA
 
   Required metafields (same as main PDP):
   - product.metafields.tpa.subheadline (single_line_text_field)
-  - product.metafields.tpa.model_suggestions (list.single_line_text_field)
+  - product.metafields.tpa.product_description (rich_text) — product description (falls back to product.description)
   - product.metafields.tpa.specs (rich_text)
-  - product.metafields.tpa.whats_included (rich_text)
   - product.metafields.tpa.warranty (single_line_text_field or rich_text)
   - product.metafields.tpa.shipping_notes (single_line_text_field or rich_text)
   - product.metafields.tpa.install_notes (single_line_text_field or rich_text)
-  - product.metafields.tpa.compatibility_note (single_line_text_field)
 {% endcomment %}
 
 {% assign sid = section.id %}
@@ -196,50 +194,6 @@
             </div>
           {% endif %}
 
-          {%- comment -%} Part: Fit checker module {%- endcomment -%}
-          {% if is_part %}
-            <div class="tpa-lp__module tpa-lp__fit" data-tpa-lp-fit>
-              <div class="tpa-lp__module-header">
-                <div class="tpa-lp__module-icon" aria-hidden="true">🔍</div>
-                <div class="tpa-lp__module-title">{{ section.settings.fit_title }}</div>
-              </div>
-              <div class="tpa-lp__fit-row">
-                <input
-                  class="tpa-lp__fit-input"
-                  type="text"
-                  inputmode="text"
-                  autocomplete="off"
-                  placeholder="{{ section.settings.fit_placeholder }}"
-                  data-tpa-lp-fit-input
-                >
-                <button class="tpa-lp__fit-btn" type="button" data-tpa-lp-fit-check>
-                  {{ section.settings.fit_btn }}
-                </button>
-              </div>
-
-              {% assign models = product.metafields.tpa.model_suggestions.value %}
-              {% if models != blank %}
-                <div class="tpa-lp__fit-chips" aria-label="Suggested models">
-                  <span class="tpa-lp__fit-chips-label">Popular:</span>
-                  {% for m in models %}
-                    <button type="button" class="tpa-lp__fit-chip" data-tpa-lp-fit-chip="{{ m }}">{{ m }}</button>
-                  {% endfor %}
-                </div>
-              {% endif %}
-
-              <div class="tpa-lp__fit-state" data-tpa-lp-fit-state>
-                <span class="tpa-lp__fit-dot" aria-hidden="true"></span>
-                <span data-tpa-lp-fit-text>{{ section.settings.fit_state_default }}</span>
-              </div>
-
-              {% assign compat_note = product.metafields.tpa.compatibility_note.value %}
-              {% if compat_note == blank %}
-                {% assign compat_note = section.settings.fit_note %}
-              {% endif %}
-              <div class="tpa-lp__fit-note">{{ compat_note }}</div>
-            </div>
-          {% endif %}
-
           {%- comment -%} Appliance: Specs grid {%- endcomment -%}
           {% if is_appliance %}
             <div class="tpa-lp__module tpa-lp__specs-module">
@@ -312,17 +266,6 @@
             </button>
           </div>
 
-          {%- comment -%} Shipping progress bar {%- endcomment -%}
-          <div class="tpa-lp__ship-bar">
-            <div class="tpa-lp__ship-text">
-              <span>🚚</span>
-              <span data-tpa-lp-ship-msg>Free shipping on orders over ${{ section.settings.free_ship_threshold | default: 75 }}</span>
-            </div>
-            <div class="tpa-lp__ship-track">
-              <div class="tpa-lp__ship-fill" style="width: {% assign thresh = section.settings.free_ship_threshold | default: 75 | times: 100 %}{% assign pct = price | times: 100 | divided_by: thresh %}{% if pct > 100 %}100{% else %}{{ pct }}{% endif %}%"></div>
-            </div>
-          </div>
-
           {%- comment -%} Trust strip (inline, below ATC) {%- endcomment -%}
           <div class="tpa-lp__trust-strip">
             {% if is_part %}
@@ -383,7 +326,21 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      4. RISK REVERSAL GUARANTEE STRIP
+      4. PRODUCT DESCRIPTION
+    {%- endcomment -%}
+    {% assign product_description = product.metafields.tpa.product_description.value %}
+    {% assign description_content = product_description | default: product.description %}
+    {% if description_content != blank %}
+      <div class="tpa-lp__desc" data-tpa-lp-section>
+        <h2 class="tpa-lp__section-title">{{ section.settings.desc_title }}</h2>
+        <div class="tpa-lp__desc-body tpa-lp__rich">
+          {{ description_content }}
+        </div>
+      </div>
+    {% endif %}
+
+    {%- comment -%} ══════════════════════════════════════════
+      5. RISK REVERSAL GUARANTEE STRIP
     {%- endcomment -%}
     <div class="tpa-lp__guarantees" data-tpa-lp-section>
       <div class="tpa-lp__guarantees-header">
@@ -415,7 +372,7 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      5. BENEFITS + WHAT'S INCLUDED
+      6. BENEFITS GRID
     {%- endcomment -%}
     <div class="tpa-lp__details-grid" data-tpa-lp-section>
       <div class="tpa-lp__detail-card">
@@ -437,17 +394,6 @@
             <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_app_4 }}</div>
             <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_app_5 }}</div>
           {% endif %}
-        </div>
-      </div>
-
-      <div class="tpa-lp__detail-card">
-        <div class="tpa-lp__detail-header">
-          <span class="tpa-lp__detail-icon" aria-hidden="true">📦</span>
-          <span class="tpa-lp__detail-title">{{ section.settings.included_title }}</span>
-        </div>
-        <div class="tpa-lp__detail-body tpa-lp__rich">
-          {% assign included = product.metafields.tpa.whats_included.value %}
-          {{ included | default: section.settings.included_fallback }}
         </div>
       </div>
     </div>
@@ -950,144 +896,6 @@
     background: rgba(29, 91, 255, 0.04);
   }
 
-  /* ── MODULE (fit checker / specs) ── */
-  .tpa-lp--{{ sid }} .tpa-lp__module{
-    margin-top: 18px;
-    border-radius: 16px;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    background: rgba(255,255,255,0.88);
-    box-shadow:
-      0 18px 50px rgba(2, 6, 23, 0.08),
-      0 4px 14px rgba(2, 6, 23, 0.05);
-    padding: 18px;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__module-header{
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__module-icon{
-    width: 32px;
-    height: 32px;
-    border-radius: 10px;
-    background: rgba(29, 91, 255, 0.06);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__module-title{
-    font-weight: 950;
-    font-size: 14px;
-    color: rgb(var(--color-foreground));
-  }
-
-  /* Fit checker */
-  .tpa-lp--{{ sid }} .tpa-lp__fit-row{
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 10px;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-input{
-    height: 46px;
-    border-radius: 12px;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    padding: 0 14px;
-    font-weight: 800;
-    font-size: 14px;
-    transition: border-color 200ms ease, box-shadow 200ms ease;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-input:focus{
-    outline: none;
-    border-color: rgba(29, 91, 255, 0.45);
-    box-shadow: 0 0 0 3px rgba(29, 91, 255, 0.10);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-btn{
-    height: 46px;
-    border-radius: 12px;
-    border: 1px solid rgba(29, 91, 255, 0.15);
-    background: rgba(29, 91, 255, 0.95);
-    color: #fff;
-    font-weight: 950;
-    font-size: 13px;
-    padding: 0 18px;
-    cursor: pointer;
-    transition: transform 180ms ease, box-shadow 180ms ease;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-btn:hover{
-    transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(29, 91, 255, 0.25);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-chips{
-    margin-top: 10px;
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-chips-label{
-    font-size: 11px;
-    font-weight: 800;
-    color: rgba(var(--color-foreground), 0.50);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-chip{
-    height: 30px;
-    padding: 0 12px;
-    border-radius: 999px;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    background: rgba(15, 23, 42, 0.04);
-    font-weight: 900;
-    font-size: 12px;
-    cursor: pointer;
-    transition: border-color 180ms ease, background 180ms ease;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-chip:hover{
-    border-color: rgba(29, 91, 255, 0.30);
-    background: rgba(29, 91, 255, 0.04);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-state{
-    margin-top: 12px;
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    font-weight: 950;
-    font-size: 13px;
-    color: rgba(var(--color-foreground), 0.74);
-    transition: color 200ms ease;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-dot{
-    width: 10px;
-    height: 10px;
-    border-radius: 999px;
-    background: rgba(148, 163, 184, 0.95);
-    box-shadow: 0 0 0 5px rgba(148, 163, 184, 0.12);
-    transition: background 300ms ease, box-shadow 300ms ease;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="good"] .tpa-lp__fit-dot{
-    background: rgba(34, 197, 94, 0.95);
-    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="good"] .tpa-lp__fit-state{
-    color: rgba(22, 163, 74, 0.95);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="warn"] .tpa-lp__fit-dot{
-    background: rgba(245, 158, 11, 0.95);
-    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.12);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="bad"] .tpa-lp__fit-dot{
-    background: rgba(239, 68, 68, 0.95);
-    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.12);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__fit-note{
-    margin-top: 10px;
-    font-size: 12px;
-    line-height: 1.55;
-    color: rgba(var(--color-foreground), 0.58);
-  }
-
   /* Specs grid */
   .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
     display: grid;
@@ -1237,49 +1045,6 @@
   @keyframes tpaLpAtcPop{{ sid }}{
     0%{ transform: scale(0.8); opacity: 0; }
     100%{ transform: scale(1); opacity: 1; }
-  }
-
-  /* Shipping bar */
-  .tpa-lp--{{ sid }} .tpa-lp__ship-bar{
-    margin-top: 14px;
-    padding: 10px 14px;
-    border-radius: 12px;
-    background: rgba(29, 91, 255, 0.03);
-    border: 1px solid rgba(29, 91, 255, 0.08);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__ship-text{
-    font-size: 12px;
-    font-weight: 800;
-    color: rgba(var(--color-foreground), 0.68);
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__ship-track{
-    height: 6px;
-    border-radius: 999px;
-    background: rgba(15, 23, 42, 0.06);
-    overflow: hidden;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__ship-fill{
-    height: 100%;
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(29, 91, 255, 0.80), rgba(34, 197, 94, 0.88));
-    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__ship-fill::after{
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
-    animation: tpaLpShipShimmer{{ sid }} 2.5s ease-in-out infinite;
-  }
-  @keyframes tpaLpShipShimmer{{ sid }}{
-    0%{ transform: translateX(-100%); }
-    100%{ transform: translateX(100%); }
   }
 
   /* Trust strip */
@@ -1506,11 +1271,34 @@
     color: rgba(var(--color-foreground), 0.62);
   }
 
-  /* ── 5. DETAILS GRID ── */
+  /* ── 4. PRODUCT DESCRIPTION ── */
+  .tpa-lp--{{ sid }} .tpa-lp__desc{
+    margin-top: 24px;
+    padding: 24px 28px;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.88);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__desc .tpa-lp__section-title{
+    margin: 0 0 14px;
+    font-size: clamp(18px, 2.2vw, 22px);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__desc-body{
+    font-size: 15px;
+    line-height: 1.75;
+    color: rgba(var(--color-foreground), 0.80);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__desc-body p{ margin: 0 0 12px; }
+  .tpa-lp--{{ sid }} .tpa-lp__desc-body p:last-child{ margin-bottom: 0; }
+
+  /* ── 6. BENEFITS GRID ── */
   .tpa-lp--{{ sid }} .tpa-lp__details-grid{
     margin-top: 24px;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 18px;
   }
   .tpa-lp--{{ sid }} .tpa-lp__detail-card{
@@ -1875,9 +1663,6 @@
     .tpa-lp--{{ sid }} .tpa-lp__guarantees-grid{
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-    .tpa-lp--{{ sid }} .tpa-lp__details-grid{
-      grid-template-columns: 1fr;
-    }
     .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
       grid-template-columns: 1fr 1fr;
     }
@@ -1886,6 +1671,27 @@
     }
     .tpa-lp--{{ sid }} .tpa-lp__trust-strip{
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 767px){
+    .tpa-lp--{{ sid }} .tpa-lp__inner{
+      padding: 0 16px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__hero{
+      padding-top: 20px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__desc{
+      padding: 18px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__section-title{
+      font-size: clamp(20px, 5.5vw, 28px);
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__detail-card{
+      padding: 16px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__guarantee{
+      padding: 18px 16px;
     }
   }
 
@@ -1919,9 +1725,6 @@
     .tpa-lp--{{ sid }} .tpa-lp__atc-shimmer,
     .tpa-lp--{{ sid }} .tpa-lp__final-btn-shimmer,
     .tpa-lp--{{ sid }} .tpa-lp__final-orb{
-      animation: none;
-    }
-    .tpa-lp--{{ sid }} .tpa-lp__ship-fill::after{
       animation: none;
     }
     .tpa-lp--{{ sid }} .tpa-lp__guarantee,
@@ -2010,49 +1813,6 @@
         }, 300);
       });
     });
-  }
-
-  /* ── Fit checker ── */
-  var fit = root.querySelector('[data-tpa-lp-fit]');
-  if (fit){
-    var fitInput = root.querySelector('[data-tpa-lp-fit-input]');
-    var fitCheck = root.querySelector('[data-tpa-lp-fit-check]');
-    var fitText = root.querySelector('[data-tpa-lp-fit-text]');
-
-    function setFitState(state, label){
-      fit.setAttribute('data-state', state);
-      if (fitText) fitText.textContent = label;
-    }
-
-    function evaluateFit(value){
-      var v = (value || '').trim();
-      if (v.length < 3){
-        setFitState('warn', {{ section.settings.fit_state_warn | json }});
-        return;
-      }
-      var chips = Array.prototype.slice.call(root.querySelectorAll('[data-tpa-lp-fit-chip]'));
-      var match = chips.some(function(b){
-        return (b.getAttribute('data-tpa-lp-fit-chip') || '').toLowerCase() === v.toLowerCase();
-      });
-      if (match){
-        setFitState('good', {{ section.settings.fit_state_good | json }});
-      } else {
-        setFitState('bad', {{ section.settings.fit_state_bad | json }});
-      }
-    }
-
-    if (fitCheck) fitCheck.addEventListener('click', function(){ evaluateFit(fitInput.value); });
-    if (fitInput) fitInput.addEventListener('input', function(){ evaluateFit(fitInput.value); });
-
-    root.addEventListener('click', function(e){
-      var chip = e.target.closest('.tpa-lp__fit-chip');
-      if (!chip) return;
-      var val = chip.getAttribute('data-tpa-lp-fit-chip') || chip.textContent;
-      if (fitInput) fitInput.value = val;
-      evaluateFit(val);
-    });
-
-    setFitState('warn', {{ section.settings.fit_state_default | json }});
   }
 
   /* ── Scroll-triggered reveals (guarantees + reviews) ── */
@@ -2176,10 +1936,9 @@
     { "type": "checkbox", "id": "stock_urgency_enable", "label": "Show stock urgency", "default": true },
     { "type": "text", "id": "stock_text", "label": "Stock urgency text", "default": "Only 8 left in stock — order soon" },
 
-    { "type": "header", "content": "Cart and shipping" },
+    { "type": "header", "content": "Cart" },
     { "type": "text", "id": "atc_label", "label": "Add to cart label", "default": "Add to Cart — Ships Fast" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold Out" },
-    { "type": "range", "id": "free_ship_threshold", "label": "Free shipping threshold ($)", "min": 25, "max": 200, "step": 5, "default": 75 },
 
     { "type": "header", "content": "Trust strip" },
     { "type": "text", "id": "trust_part_1", "label": "Parts trust 1", "default": "Perfect Fit Guarantee" },
@@ -2190,16 +1949,6 @@
     { "type": "text", "id": "trust_app_2", "label": "Appliances trust 2", "default": "Fast AU Shipping" },
     { "type": "text", "id": "trust_app_3", "label": "Appliances trust 3", "default": "30-Day Returns" },
     { "type": "text", "id": "trust_app_4", "label": "Appliances trust 4", "default": "Australian Support" },
-
-    { "type": "header", "content": "Parts compatibility module" },
-    { "type": "text", "id": "fit_title", "label": "Fit title", "default": "Check Fit For Your Model" },
-    { "type": "text", "id": "fit_placeholder", "label": "Fit placeholder", "default": "Enter your model number" },
-    { "type": "text", "id": "fit_btn", "label": "Fit button", "default": "Check Fit" },
-    { "type": "text", "id": "fit_state_default", "label": "Fit default state", "default": "Enter model to verify" },
-    { "type": "text", "id": "fit_state_good", "label": "Fit verified state", "default": "Verified Compatible ✓" },
-    { "type": "text", "id": "fit_state_warn", "label": "Fit warn state", "default": "Enter model to verify" },
-    { "type": "text", "id": "fit_state_bad", "label": "Fit contact state", "default": "Contact Support to Confirm" },
-    { "type": "text", "id": "fit_note", "label": "Fit note fallback", "default": "Our team confirms compatibility before dispatch if required. Zero risk." },
 
     { "type": "header", "content": "Appliance specs" },
     { "type": "text", "id": "specs_title", "label": "Specs title", "default": "Key Specifications" },
@@ -2233,6 +1982,9 @@
     { "type": "text", "id": "guarantee_4_title", "label": "Guarantee 4 title", "default": "Australian Support" },
     { "type": "text", "id": "guarantee_4_desc", "label": "Guarantee 4 desc", "default": "Real people, real help. Our Australian team is here before and after your purchase." },
 
+    { "type": "header", "content": "Product description" },
+    { "type": "text", "id": "desc_title", "label": "Description section title", "default": "Product Description" },
+
     { "type": "header", "content": "Benefits" },
     { "type": "text", "id": "benefits_title", "label": "Benefits title", "default": "Why This Part" },
     { "type": "text", "id": "benefit_part_1", "label": "Part benefit 1", "default": "Restores full performance to your appliance" },
@@ -2245,9 +1997,6 @@
     { "type": "text", "id": "benefit_app_3", "label": "App benefit 3", "default": "Energy efficient operation" },
     { "type": "text", "id": "benefit_app_4", "label": "App benefit 4", "default": "Full warranty coverage included" },
     { "type": "text", "id": "benefit_app_5", "label": "App benefit 5", "default": "Australian support when you need it" },
-
-    { "type": "text", "id": "included_title", "label": "What's included title", "default": "What's in the Box" },
-    { "type": "richtext", "id": "included_fallback", "label": "Included fallback", "default": "<p>Set the \"What's included\" metafield on this product for exact box contents.</p>" },
 
     { "type": "header", "content": "Risk reversal" },
     { "type": "text", "id": "risk_part", "label": "Parts risk statement", "default": "We only sell parts verified for compatibility. If it's not right, we fix it — that's our guarantee." },
@@ -2263,7 +2012,7 @@
     { "type": "text", "id": "faq_subtitle", "label": "FAQ subtitle", "default": "Everything you need to know before ordering." },
 
     { "type": "text", "id": "faq_part_q1", "label": "Parts Q1", "default": "How do I know this part fits my appliance?" },
-    { "type": "text", "id": "faq_part_a1", "label": "Parts A1", "default": "Use the model checker above to verify instantly. If your model isn't listed, contact our support team — we confirm compatibility before dispatch so you never receive the wrong part." },
+    { "type": "text", "id": "faq_part_a1", "label": "Parts A1", "default": "Contact our support team to confirm compatibility. We verify before dispatch so you always receive the right part — that's our Perfect Fit Guarantee." },
     { "type": "text", "id": "faq_part_q2", "label": "Parts Q2", "default": "How long does shipping take?" },
     { "type": "text", "id": "faq_part_a2", "label": "Parts A2", "default": "We dispatch fast from Australia. Most metro orders arrive in 2-5 business days. Tracking is provided with every order." },
     { "type": "text", "id": "faq_part_q3", "label": "Parts Q3", "default": "Is installation difficult?" },
