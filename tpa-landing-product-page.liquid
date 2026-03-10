@@ -1,0 +1,2381 @@
+{% comment %}
+  Section: TPA Landing Product Page
+  Purpose: High-conversion product page designed for cold traffic from Google Ads.
+  Optimized for trust, urgency, and premium authority.
+  Uses TPA design system: dark navy gradients, #1D5BFF accent, 950 weights, 18px radii.
+
+  Structure (conversion-optimized flow):
+  1. Urgency announcement bar
+  2. Product hero (media + info + trust strip)
+  3. Social proof counter bar
+  4. Fit checker / Specs (Part vs Appliance)
+  5. Risk reversal guarantee strip
+  6. Benefits grid
+  7. What's Included
+  8. Inline reviews
+  9. FAQ (objection handling)
+  10. Persistent sticky mobile CTA
+
+  Required metafields (same as main PDP):
+  - product.metafields.tpa.subheadline (single_line_text_field)
+  - product.metafields.tpa.model_suggestions (list.single_line_text_field)
+  - product.metafields.tpa.specs (rich_text)
+  - product.metafields.tpa.whats_included (rich_text)
+  - product.metafields.tpa.warranty (single_line_text_field or rich_text)
+  - product.metafields.tpa.shipping_notes (single_line_text_field or rich_text)
+  - product.metafields.tpa.install_notes (single_line_text_field or rich_text)
+  - product.metafields.tpa.compatibility_note (single_line_text_field)
+{% endcomment %}
+
+{% assign sid = section.id %}
+{% assign is_appliance = false %}
+{% if product.tags contains 'Appliance' %}
+  {% assign is_appliance = true %}
+{% endif %}
+{% assign is_part = false %}
+{% if product.tags contains 'Part' %}
+  {% assign is_part = true %}
+{% endif %}
+{% if is_appliance == false and is_part == false %}
+  {% assign is_part = true %}
+{% endif %}
+{% assign v = product.selected_or_first_available_variant %}
+{% assign price = v.price %}
+{% assign compare = v.compare_at_price %}
+
+{%- comment -%} ══════════════════════════════════════════
+  1. URGENCY ANNOUNCEMENT BAR
+{%- endcomment -%}
+<div class="tpa-lp__announce tpa-lp__announce--{{ sid }}" data-tpa-lp-announce>
+  <div class="tpa-lp__announce-inner">
+    <span class="tpa-lp__announce-dot" aria-hidden="true"></span>
+    <span class="tpa-lp__announce-text" data-tpa-lp-announce-text>{{ section.settings.announce_text }}</span>
+  </div>
+</div>
+
+{%- comment -%} ══════════════════════════════════════════
+  2. MAIN PRODUCT SECTION
+{%- endcomment -%}
+<section class="tpa-lp tpa-lp--{{ sid }} color-{{ section.settings.color_scheme }}">
+  <div class="tpa-lp__inner">
+
+    {%- comment -%} ── PRODUCT HERO GRID ── {%- endcomment -%}
+    <div class="tpa-lp__hero">
+
+      {%- comment -%} LEFT: MEDIA GALLERY {%- endcomment -%}
+      <div class="tpa-lp__media">
+        <div class="tpa-lp__gallery" data-tpa-lp-gallery>
+          {% assign featured = product.featured_media %}
+          {% if featured %}
+            <div class="tpa-lp__stage" data-tpa-lp-stage data-tpa-lp-zoom>
+              {% render 'tpa-pdp-media', media: featured, index: 0 %}
+
+              {% if section.settings.media_badge_enable %}
+                <div class="tpa-lp__media-badge">
+                  <span class="tpa-lp__media-badge-dot" aria-hidden="true"></span>
+                  <span>{{ section.settings.media_badge_text }}</span>
+                </div>
+              {% endif %}
+
+              {% if compare > price %}
+                <div class="tpa-lp__sale-flag" aria-label="On sale">
+                  <span>SAVE {{ compare | minus: price | money }}</span>
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+
+          {% assign media_count = product.media.size %}
+          {% if media_count > 1 %}
+            <div class="tpa-lp__thumbs" aria-label="Product media">
+              {% for media in product.media %}
+                <button
+                  class="tpa-lp__thumb{% if media.id == featured.id %} is-active{% endif %}"
+                  type="button"
+                  data-tpa-lp-thumb
+                  data-media-id="{{ media.id }}"
+                  aria-label="View media {{ forloop.index }}"
+                >
+                  {% if media.preview_image %}
+                    <img
+                      src="{{ media.preview_image | image_url: width: 220 }}"
+                      alt="{{ media.preview_image.alt | default: product.title | escape }}"
+                      loading="lazy"
+                      width="84"
+                      height="84"
+                    >
+                  {% endif %}
+                </button>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {%- comment -%} RIGHT: PRODUCT INFO + BUY BOX {%- endcomment -%}
+      <div class="tpa-lp__buy">
+
+        {%- comment -%} Live activity indicator {%- endcomment -%}
+        <div class="tpa-lp__activity" data-tpa-lp-activity>
+          <span class="tpa-lp__activity-dot" aria-hidden="true"></span>
+          <span data-tpa-lp-activity-text>{{ section.settings.activity_text }}</span>
+        </div>
+
+        <h1 class="tpa-lp__title">{{ product.title }}</h1>
+
+        {% assign subheadline = product.metafields.tpa.subheadline.value %}
+        {% if subheadline == blank %}
+          {% if is_part %}
+            {% assign subheadline = section.settings.part_subheadline_fallback %}
+          {% else %}
+            {% assign subheadline = section.settings.appliance_subheadline_fallback %}
+          {% endif %}
+        {% endif %}
+        {% if subheadline != blank %}
+          <div class="tpa-lp__subheadline">{{ subheadline }}</div>
+        {% endif %}
+
+        {%- comment -%} Rating + review count {%- endcomment -%}
+        <div class="tpa-lp__rating">
+          <div class="tpa-lp__stars" aria-label="{{ section.settings.rating_stars }} out of 5 stars">
+            {% assign star_count = section.settings.rating_stars | plus: 0 %}
+            {% for i in (1..5) %}
+              <span class="tpa-lp__star{% if i <= star_count %} is-on{% endif %}" aria-hidden="true">★</span>
+            {% endfor %}
+          </div>
+          <span class="tpa-lp__rating-score">{{ section.settings.rating_stars }}/5</span>
+          <a class="tpa-lp__rating-link" href="#tpa-lp-reviews-{{ sid }}">{{ section.settings.rating_count }} verified reviews</a>
+        </div>
+
+        {%- comment -%} Price block {%- endcomment -%}
+        <div class="tpa-lp__price-block" data-tpa-lp-price>
+          <div class="tpa-lp__price-row">
+            <div class="tpa-lp__price">{{ price | money }}</div>
+            {% if compare > price %}
+              <div class="tpa-lp__compare">{{ compare | money }}</div>
+              <div class="tpa-lp__save-pill">
+                Save {{ compare | minus: price | money }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="tpa-lp__price-note">{{ section.settings.price_note }}</div>
+        </div>
+
+        {%- comment -%} Stock urgency {%- endcomment -%}
+        {% if section.settings.stock_urgency_enable %}
+          <div class="tpa-lp__stock" data-tpa-lp-stock>
+            <span class="tpa-lp__stock-dot" aria-hidden="true"></span>
+            <span class="tpa-lp__stock-text">{{ section.settings.stock_text }}</span>
+          </div>
+        {% endif %}
+
+        {%- comment -%} ── PRODUCT FORM ── {%- endcomment -%}
+        {% form 'product', product, class: 'tpa-lp__form', data-tpa-lp-form: '' %}
+          <input type="hidden" name="id" value="{{ v.id }}" data-tpa-lp-variant-id>
+
+          {% if product.has_only_default_variant == false %}
+            <div class="tpa-lp__variants">
+              {% for option in product.options_with_values %}
+                <div class="tpa-lp__opt">
+                  <div class="tpa-lp__opt-label">{{ option.name }}</div>
+                  <div class="tpa-lp__opt-values">
+                    {% for value in option.values %}
+                      <label class="tpa-lp__chip">
+                        <input
+                          type="radio"
+                          name="options[{{ option.name | escape }}]"
+                          value="{{ value | escape }}"
+                          {% if option.selected_value == value %}checked{% endif %}
+                        >
+                        <span>{{ value }}</span>
+                      </label>
+                    {% endfor %}
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          {%- comment -%} Part: Fit checker module {%- endcomment -%}
+          {% if is_part %}
+            <div class="tpa-lp__module tpa-lp__fit" data-tpa-lp-fit>
+              <div class="tpa-lp__module-header">
+                <div class="tpa-lp__module-icon" aria-hidden="true">🔍</div>
+                <div class="tpa-lp__module-title">{{ section.settings.fit_title }}</div>
+              </div>
+              <div class="tpa-lp__fit-row">
+                <input
+                  class="tpa-lp__fit-input"
+                  type="text"
+                  inputmode="text"
+                  autocomplete="off"
+                  placeholder="{{ section.settings.fit_placeholder }}"
+                  data-tpa-lp-fit-input
+                >
+                <button class="tpa-lp__fit-btn" type="button" data-tpa-lp-fit-check>
+                  {{ section.settings.fit_btn }}
+                </button>
+              </div>
+
+              {% assign models = product.metafields.tpa.model_suggestions.value %}
+              {% if models != blank %}
+                <div class="tpa-lp__fit-chips" aria-label="Suggested models">
+                  <span class="tpa-lp__fit-chips-label">Popular:</span>
+                  {% for m in models %}
+                    <button type="button" class="tpa-lp__fit-chip" data-tpa-lp-fit-chip="{{ m }}">{{ m }}</button>
+                  {% endfor %}
+                </div>
+              {% endif %}
+
+              <div class="tpa-lp__fit-state" data-tpa-lp-fit-state>
+                <span class="tpa-lp__fit-dot" aria-hidden="true"></span>
+                <span data-tpa-lp-fit-text>{{ section.settings.fit_state_default }}</span>
+              </div>
+
+              {% assign compat_note = product.metafields.tpa.compatibility_note.value %}
+              {% if compat_note == blank %}
+                {% assign compat_note = section.settings.fit_note %}
+              {% endif %}
+              <div class="tpa-lp__fit-note">{{ compat_note }}</div>
+            </div>
+          {% endif %}
+
+          {%- comment -%} Appliance: Specs grid {%- endcomment -%}
+          {% if is_appliance %}
+            <div class="tpa-lp__module tpa-lp__specs-module">
+              <div class="tpa-lp__module-header">
+                <div class="tpa-lp__module-icon" aria-hidden="true">📋</div>
+                <div class="tpa-lp__module-title">{{ section.settings.specs_title }}</div>
+              </div>
+
+              <div class="tpa-lp__specs-grid">
+                <div class="tpa-lp__spec">
+                  <div class="tpa-lp__spec-icon" aria-hidden="true">🛡️</div>
+                  <div class="tpa-lp__spec-k">{{ section.settings.specs_warranty_label }}</div>
+                  <div class="tpa-lp__spec-v">
+                    {% assign warranty = product.metafields.tpa.warranty.value %}
+                    {{ warranty | default: section.settings.specs_warranty_fallback }}
+                  </div>
+                </div>
+                <div class="tpa-lp__spec">
+                  <div class="tpa-lp__spec-icon" aria-hidden="true">🚚</div>
+                  <div class="tpa-lp__spec-k">{{ section.settings.specs_shipping_label }}</div>
+                  <div class="tpa-lp__spec-v">
+                    {% assign ship = product.metafields.tpa.shipping_notes.value %}
+                    {{ ship | default: section.settings.specs_shipping_fallback }}
+                  </div>
+                </div>
+                <div class="tpa-lp__spec">
+                  <div class="tpa-lp__spec-icon" aria-hidden="true">⚙️</div>
+                  <div class="tpa-lp__spec-k">{{ section.settings.specs_setup_label }}</div>
+                  <div class="tpa-lp__spec-v">
+                    {% assign setup = product.metafields.tpa.install_notes.value %}
+                    {{ setup | default: section.settings.specs_setup_fallback }}
+                  </div>
+                </div>
+                <div class="tpa-lp__spec tpa-lp__spec--full">
+                  <div class="tpa-lp__spec-icon" aria-hidden="true">📊</div>
+                  <div class="tpa-lp__spec-k">{{ section.settings.specs_key_label }}</div>
+                  <div class="tpa-lp__spec-v">
+                    {% assign specs = product.metafields.tpa.specs.value %}
+                    {{ specs | default: section.settings.specs_key_fallback }}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+
+          {%- comment -%} Quantity + ATC {%- endcomment -%}
+          <div class="tpa-lp__buy-row">
+            <div class="tpa-lp__qty" data-tpa-lp-qty>
+              <button class="tpa-lp__qty-btn" type="button" data-tpa-lp-qty-dec aria-label="Decrease quantity">−</button>
+              <input class="tpa-lp__qty-input" type="number" name="quantity" value="1" min="1" inputmode="numeric" data-tpa-lp-qty-input>
+              <button class="tpa-lp__qty-btn" type="button" data-tpa-lp-qty-inc aria-label="Increase quantity">+</button>
+            </div>
+
+            <button
+              class="tpa-lp__atc"
+              type="submit"
+              name="add"
+              {% unless v.available %}disabled{% endunless %}
+              data-tpa-lp-atc
+            >
+              <span class="tpa-lp__atc-shimmer" aria-hidden="true"></span>
+              <span class="tpa-lp__atc-default">
+                <span aria-hidden="true">🛒</span>
+                <span>{% if v.available %}{{ section.settings.atc_label }}{% else %}{{ section.settings.sold_out_label }}{% endif %}</span>
+              </span>
+              <span class="tpa-lp__atc-success" aria-hidden="true">
+                <span>✓</span>
+                <span>Added to Cart!</span>
+              </span>
+            </button>
+          </div>
+
+          {%- comment -%} Shipping progress bar {%- endcomment -%}
+          <div class="tpa-lp__ship-bar">
+            <div class="tpa-lp__ship-text">
+              <span>🚚</span>
+              <span data-tpa-lp-ship-msg>Free shipping on orders over ${{ section.settings.free_ship_threshold | default: 75 }}</span>
+            </div>
+            <div class="tpa-lp__ship-track">
+              <div class="tpa-lp__ship-fill" style="width: {% assign thresh = section.settings.free_ship_threshold | default: 75 | times: 100 %}{% assign pct = price | times: 100 | divided_by: thresh %}{% if pct > 100 %}100{% else %}{{ pct }}{% endif %}%"></div>
+            </div>
+          </div>
+
+          {%- comment -%} Trust strip (inline, below ATC) {%- endcomment -%}
+          <div class="tpa-lp__trust-strip">
+            {% if is_part %}
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_part_1 }}</div>
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_part_2 }}</div>
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_part_3 }}</div>
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_part_4 }}</div>
+            {% else %}
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_app_1 }}</div>
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_app_2 }}</div>
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_app_3 }}</div>
+              <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_app_4 }}</div>
+            {% endif %}
+          </div>
+
+          {%- comment -%} Sticky mobile bar {%- endcomment -%}
+          <div class="tpa-lp__sticky" data-tpa-lp-sticky>
+            <div class="tpa-lp__sticky-left">
+              <div class="tpa-lp__sticky-title">{{ product.title | truncate: 36 }}</div>
+              <div class="tpa-lp__sticky-price">
+                {{ price | money }}
+                {% if compare > price %}
+                  <span class="tpa-lp__sticky-save">Save {{ compare | minus: price | money }}</span>
+                {% endif %}
+              </div>
+            </div>
+            <button class="tpa-lp__sticky-atc" type="submit" name="add" {% unless v.available %}disabled{% endunless %}>
+              <span aria-hidden="true">🛒</span> {{ section.settings.atc_label }}
+            </button>
+          </div>
+        {% endform %}
+      </div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      3. SOCIAL PROOF COUNTER BAR
+    {%- endcomment -%}
+    <div class="tpa-lp__proof-bar" data-tpa-lp-proof>
+      <div class="tpa-lp__proof-item">
+        <div class="tpa-lp__proof-num" data-tpa-lp-countup="{{ section.settings.proof_1_num }}">{{ section.settings.proof_1_num }}</div>
+        <div class="tpa-lp__proof-label">{{ section.settings.proof_1_label }}</div>
+      </div>
+      <div class="tpa-lp__proof-divider" aria-hidden="true"></div>
+      <div class="tpa-lp__proof-item">
+        <div class="tpa-lp__proof-num">{{ section.settings.proof_2_num }}</div>
+        <div class="tpa-lp__proof-label">{{ section.settings.proof_2_label }}</div>
+      </div>
+      <div class="tpa-lp__proof-divider" aria-hidden="true"></div>
+      <div class="tpa-lp__proof-item">
+        <div class="tpa-lp__proof-num">{{ section.settings.proof_3_num }}</div>
+        <div class="tpa-lp__proof-label">{{ section.settings.proof_3_label }}</div>
+      </div>
+      <div class="tpa-lp__proof-divider" aria-hidden="true"></div>
+      <div class="tpa-lp__proof-item">
+        <div class="tpa-lp__proof-num">{{ section.settings.proof_4_num }}</div>
+        <div class="tpa-lp__proof-label">{{ section.settings.proof_4_label }}</div>
+      </div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      4. RISK REVERSAL GUARANTEE STRIP
+    {%- endcomment -%}
+    <div class="tpa-lp__guarantees" data-tpa-lp-section>
+      <div class="tpa-lp__guarantees-header">
+        <div class="tpa-lp__guarantees-pill">ZERO RISK</div>
+        <h2 class="tpa-lp__section-title">{{ section.settings.guarantee_title }}</h2>
+      </div>
+      <div class="tpa-lp__guarantees-grid">
+        <div class="tpa-lp__guarantee" data-tpa-lp-reveal>
+          <div class="tpa-lp__guarantee-icon" aria-hidden="true">🎯</div>
+          <div class="tpa-lp__guarantee-title">{{ section.settings.guarantee_1_title }}</div>
+          <div class="tpa-lp__guarantee-desc">{{ section.settings.guarantee_1_desc }}</div>
+        </div>
+        <div class="tpa-lp__guarantee" data-tpa-lp-reveal>
+          <div class="tpa-lp__guarantee-icon" aria-hidden="true">🚚</div>
+          <div class="tpa-lp__guarantee-title">{{ section.settings.guarantee_2_title }}</div>
+          <div class="tpa-lp__guarantee-desc">{{ section.settings.guarantee_2_desc }}</div>
+        </div>
+        <div class="tpa-lp__guarantee" data-tpa-lp-reveal>
+          <div class="tpa-lp__guarantee-icon" aria-hidden="true">↩️</div>
+          <div class="tpa-lp__guarantee-title">{{ section.settings.guarantee_3_title }}</div>
+          <div class="tpa-lp__guarantee-desc">{{ section.settings.guarantee_3_desc }}</div>
+        </div>
+        <div class="tpa-lp__guarantee" data-tpa-lp-reveal>
+          <div class="tpa-lp__guarantee-icon" aria-hidden="true">🇦🇺</div>
+          <div class="tpa-lp__guarantee-title">{{ section.settings.guarantee_4_title }}</div>
+          <div class="tpa-lp__guarantee-desc">{{ section.settings.guarantee_4_desc }}</div>
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      5. BENEFITS + WHAT'S INCLUDED
+    {%- endcomment -%}
+    <div class="tpa-lp__details-grid" data-tpa-lp-section>
+      <div class="tpa-lp__detail-card">
+        <div class="tpa-lp__detail-header">
+          <span class="tpa-lp__detail-icon" aria-hidden="true">⚡</span>
+          <span class="tpa-lp__detail-title">{{ section.settings.benefits_title }}</span>
+        </div>
+        <div class="tpa-lp__detail-body">
+          {% if is_part %}
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_part_1 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_part_2 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_part_3 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_part_4 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_part_5 }}</div>
+          {% else %}
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_app_1 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_app_2 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_app_3 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_app_4 }}</div>
+            <div class="tpa-lp__benefit"><span class="tpa-lp__benefit-check" aria-hidden="true">✓</span> {{ section.settings.benefit_app_5 }}</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="tpa-lp__detail-card">
+        <div class="tpa-lp__detail-header">
+          <span class="tpa-lp__detail-icon" aria-hidden="true">📦</span>
+          <span class="tpa-lp__detail-title">{{ section.settings.included_title }}</span>
+        </div>
+        <div class="tpa-lp__detail-body tpa-lp__rich">
+          {% assign included = product.metafields.tpa.whats_included.value %}
+          {{ included | default: section.settings.included_fallback }}
+        </div>
+      </div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      6. RISK STATEMENT (bold, centered)
+    {%- endcomment -%}
+    <div class="tpa-lp__risk-banner" data-tpa-lp-section>
+      <div class="tpa-lp__risk-icon" aria-hidden="true">🛡️</div>
+      <div class="tpa-lp__risk-text">
+        {% if is_part %}
+          {{ section.settings.risk_part }}
+        {% else %}
+          {{ section.settings.risk_app }}
+        {% endif %}
+      </div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      7. INLINE REVIEWS
+    {%- endcomment -%}
+    <div class="tpa-lp__reviews" id="tpa-lp-reviews-{{ sid }}" data-tpa-lp-section>
+      <div class="tpa-lp__reviews-header">
+        <h2 class="tpa-lp__section-title">{{ section.settings.reviews_title }}</h2>
+        <div class="tpa-lp__reviews-summary">
+          <div class="tpa-lp__stars" aria-hidden="true">
+            <span class="tpa-lp__star is-on">★</span>
+            <span class="tpa-lp__star is-on">★</span>
+            <span class="tpa-lp__star is-on">★</span>
+            <span class="tpa-lp__star is-on">★</span>
+            <span class="tpa-lp__star is-on">★</span>
+          </div>
+          <span class="tpa-lp__reviews-avg">{{ section.settings.rating_stars }}/5 from {{ section.settings.rating_count }} reviews</span>
+        </div>
+      </div>
+
+      <div class="tpa-lp__reviews-grid">
+        {% for block in section.blocks %}
+          {% if block.type == 'review' %}
+            <article class="tpa-lp__review" {{ block.shopify_attributes }} data-tpa-lp-reveal>
+              <div class="tpa-lp__review-top">
+                <div class="tpa-lp__stars" aria-label="{{ block.settings.stars }} out of 5 stars">
+                  {% assign s = block.settings.stars | plus: 0 %}
+                  {% for i in (1..5) %}
+                    <span class="tpa-lp__star{% if i <= s %} is-on{% endif %}" aria-hidden="true">★</span>
+                  {% endfor %}
+                </div>
+                {% if block.settings.verified %}
+                  <div class="tpa-lp__review-verified">
+                    <span class="tpa-lp__review-badge" aria-hidden="true">✓</span>
+                    Verified
+                  </div>
+                {% endif %}
+              </div>
+
+              {% if block.settings.headline != blank %}
+                <div class="tpa-lp__review-headline">"{{ block.settings.headline }}"</div>
+              {% endif %}
+
+              <div class="tpa-lp__review-quote">{{ block.settings.quote }}</div>
+
+              <div class="tpa-lp__review-footer">
+                <div class="tpa-lp__review-name">{{ block.settings.name }}</div>
+                <div class="tpa-lp__review-loc">{{ block.settings.location }}</div>
+              </div>
+            </article>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      <div class="tpa-lp__reviews-note">{{ section.settings.reviews_note }}</div>
+      <div class="tpa-lp__reviews-placeholder">{{ section.settings.reviews_placeholder }}</div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      8. FAQ (objection handling)
+    {%- endcomment -%}
+    <div class="tpa-lp__faq" data-tpa-lp-section>
+      <h2 class="tpa-lp__section-title">{{ section.settings.faq_title }}</h2>
+      <div class="tpa-lp__faq-subtitle">{{ section.settings.faq_subtitle }}</div>
+
+      <div class="tpa-lp__faq-list">
+        {% if is_part %}
+          <details class="tpa-lp__faq-item" open>
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_part_q1 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_part_a1 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_part_q2 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_part_a2 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_part_q3 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_part_a3 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_part_q4 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_part_a4 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_part_q5 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_part_a5 }}</div>
+          </details>
+        {% else %}
+          <details class="tpa-lp__faq-item" open>
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_app_q1 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_app_a1 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_app_q2 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_app_a2 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_app_q3 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_app_a3 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_app_q4 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_app_a4 }}</div>
+          </details>
+          <details class="tpa-lp__faq-item">
+            <summary class="tpa-lp__faq-q">{{ section.settings.faq_app_q5 }}</summary>
+            <div class="tpa-lp__faq-a">{{ section.settings.faq_app_a5 }}</div>
+          </details>
+        {% endif %}
+      </div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      9. FINAL CTA BANNER
+    {%- endcomment -%}
+    <div class="tpa-lp__final-cta" data-tpa-lp-section>
+      <div class="tpa-lp__final-orb" aria-hidden="true"></div>
+      <div class="tpa-lp__final-content">
+        <div class="tpa-lp__final-title">{{ section.settings.final_cta_title }}</div>
+        <div class="tpa-lp__final-sub">{{ section.settings.final_cta_sub }}</div>
+        <a class="tpa-lp__final-btn" href="#tpa-lp-top-{{ sid }}">
+          <span class="tpa-lp__final-btn-shimmer" aria-hidden="true"></span>
+          {{ section.settings.final_cta_btn }}
+          <span aria-hidden="true">↑</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<style>
+  /* ═══════════════════════════════════════════════════════════
+     TPA LANDING PRODUCT PAGE — COMPLETE STYLES
+     Design tokens: #06122C/#071A3A dark, #1D5BFF accent,
+     18px radii, 950 weights, multi-layer shadows
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ── 1. ANNOUNCEMENT BAR ── */
+  .tpa-lp__announce--{{ sid }}{
+    background: linear-gradient(90deg, #06122C, #0B1D40, #06122C);
+    color: #fff;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    position: relative;
+    overflow: hidden;
+  }
+  .tpa-lp__announce-inner{
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tpa-lp__announce-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.95);
+    animation: tpaLpPulse{{ sid }} 2s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+  @keyframes tpaLpPulse{{ sid }}{
+    0%, 100%{ box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+    50%{ box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  }
+
+  /* ── 2. MAIN SECTION ── */
+  .tpa-lp--{{ sid }}{
+    padding: 0 0 64px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__inner{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ── HERO GRID ── */
+  .tpa-lp--{{ sid }} .tpa-lp__hero{
+    display: grid;
+    grid-template-columns: 1.08fr 0.92fr;
+    gap: 38px;
+    align-items: start;
+    padding-top: 32px;
+  }
+
+  /* ── GALLERY ── */
+  .tpa-lp--{{ sid }} .tpa-lp__stage{
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(15, 23, 42, 0.03);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.10),
+      0 4px 14px rgba(2, 6, 23, 0.06);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__stage img,
+  .tpa-lp--{{ sid }} .tpa-lp__stage video,
+  .tpa-lp--{{ sid }} .tpa-lp__stage iframe{
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  }
+  @media (min-width: 981px){
+    .tpa-lp--{{ sid }} .tpa-lp__stage[data-tpa-lp-zoom]{ cursor: zoom-in; }
+    .tpa-lp--{{ sid }} .tpa-lp__stage[data-tpa-lp-zoom]:hover img{
+      transform: scale(1.08);
+    }
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__stage.is-switching img,
+  .tpa-lp--{{ sid }} .tpa-lp__stage.is-switching video{
+    opacity: 0;
+    transform: scale(0.96);
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__media-badge{
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(8, 14, 26, 0.72);
+    border: 1px solid rgba(255,255,255,0.10);
+    color: rgba(255,255,255,0.92);
+    font-weight: 900;
+    font-size: 12px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__media-badge-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.95);
+    box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.12);
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__sale-flag{
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.92);
+    color: #fff;
+    font-weight: 950;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25);
+    animation: tpaLpFlagPulse{{ sid }} 2.5s ease-in-out infinite;
+  }
+  @keyframes tpaLpFlagPulse{{ sid }}{
+    0%, 100%{ box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25); }
+    50%{ box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25), 0 0 0 5px rgba(239, 68, 68, 0.12); }
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__thumbs{
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 84px;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 12px 2px 0;
+    scrollbar-width: none;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__thumbs::-webkit-scrollbar{ display:none; }
+  .tpa-lp--{{ sid }} .tpa-lp__thumb{
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(15, 23, 42, 0.04);
+    padding: 6px;
+    cursor: pointer;
+    transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__thumb:hover{
+    border-color: rgba(29, 91, 255, 0.30);
+    transform: translateY(-2px);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__thumb.is-active{
+    border-color: rgba(29, 91, 255, 0.55);
+    box-shadow: 0 0 0 2px rgba(29, 91, 255, 0.14);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__thumb img{
+    width: 100%;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
+  }
+
+  /* ── BUY BOX ── */
+  .tpa-lp--{{ sid }} .tpa-lp__activity{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(29, 91, 255, 0.06);
+    border: 1px solid rgba(29, 91, 255, 0.12);
+    font-weight: 800;
+    font-size: 12px;
+    color: rgba(29, 91, 255, 0.90);
+    margin-bottom: 14px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__activity-dot{
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(29, 91, 255, 0.85);
+    animation: tpaLpPulse{{ sid }} 2s ease-in-out infinite;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__title{
+    margin: 0;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    font-size: clamp(26px, 3.2vw, 42px);
+    color: rgb(var(--color-foreground));
+    line-height: 1.08;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__subheadline{
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.55;
+    color: rgba(var(--color-foreground), 0.68);
+  }
+
+  /* Rating */
+  .tpa-lp--{{ sid }} .tpa-lp__rating{
+    margin-top: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__stars{
+    display: inline-flex;
+    gap: 2px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__star{
+    font-size: 15px;
+    color: rgba(245, 158, 11, 0.30);
+    line-height: 1;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__star.is-on{
+    color: rgba(245, 158, 11, 0.95);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rating-score{
+    font-weight: 950;
+    font-size: 13px;
+    color: rgb(var(--color-foreground));
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rating-link{
+    font-size: 12px;
+    color: rgba(29, 91, 255, 0.90);
+    text-decoration: none;
+    font-weight: 800;
+    border-bottom: 1px dashed rgba(29, 91, 255, 0.30);
+    padding-bottom: 1px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rating-link:hover{
+    border-bottom-style: solid;
+    color: rgba(29, 91, 255, 1);
+  }
+
+  /* Price */
+  .tpa-lp--{{ sid }} .tpa-lp__price-block{
+    margin-top: 16px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(29, 91, 255, 0.03);
+    border: 1px solid rgba(29, 91, 255, 0.08);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__price-row{
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__price{
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: 32px;
+    color: rgb(var(--color-foreground));
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__compare{
+    font-size: 14px;
+    color: rgba(var(--color-foreground), 0.42);
+    text-decoration: line-through;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__save-pill{
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+    font-size: 12px;
+    font-weight: 950;
+    color: rgba(239, 68, 68, 0.90);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__price-note{
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(var(--color-foreground), 0.55);
+    font-weight: 700;
+  }
+
+  /* Stock urgency */
+  .tpa-lp--{{ sid }} .tpa-lp__stock{
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.06);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+    font-weight: 900;
+    font-size: 12px;
+    color: rgba(180, 120, 0, 0.95);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__stock-dot{
+    width: 7px;
+    height: 7px;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.90);
+    animation: tpaLpPulse{{ sid }} 1.5s ease-in-out infinite;
+  }
+
+  /* Variants */
+  .tpa-lp--{{ sid }} .tpa-lp__variants{
+    margin-top: 18px;
+    display: grid;
+    gap: 14px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__opt-label{
+    font-size: 12px;
+    font-weight: 950;
+    color: rgba(var(--color-foreground), 0.78);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__opt-values{
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__chip{
+    display: inline-flex;
+    align-items: center;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__chip input{
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__chip span{
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.85);
+    font-weight: 900;
+    font-size: 13px;
+    cursor: pointer;
+    transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease, transform 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__chip span:hover{
+    border-color: rgba(29, 91, 255, 0.30);
+    background: rgba(29, 91, 255, 0.03);
+    transform: translateY(-1px);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__chip input:checked + span{
+    border-color: rgba(29, 91, 255, 0.55);
+    box-shadow: 0 0 0 2px rgba(29, 91, 255, 0.14);
+    background: rgba(29, 91, 255, 0.04);
+  }
+
+  /* ── MODULE (fit checker / specs) ── */
+  .tpa-lp--{{ sid }} .tpa-lp__module{
+    margin-top: 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.88);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+    padding: 18px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__module-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__module-icon{
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(29, 91, 255, 0.06);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__module-title{
+    font-weight: 950;
+    font-size: 14px;
+    color: rgb(var(--color-foreground));
+  }
+
+  /* Fit checker */
+  .tpa-lp--{{ sid }} .tpa-lp__fit-row{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-input{
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    padding: 0 14px;
+    font-weight: 800;
+    font-size: 14px;
+    transition: border-color 200ms ease, box-shadow 200ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-input:focus{
+    outline: none;
+    border-color: rgba(29, 91, 255, 0.45);
+    box-shadow: 0 0 0 3px rgba(29, 91, 255, 0.10);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-btn{
+    height: 46px;
+    border-radius: 12px;
+    border: 1px solid rgba(29, 91, 255, 0.15);
+    background: rgba(29, 91, 255, 0.95);
+    color: #fff;
+    font-weight: 950;
+    font-size: 13px;
+    padding: 0 18px;
+    cursor: pointer;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-btn:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(29, 91, 255, 0.25);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-chips{
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-chips-label{
+    font-size: 11px;
+    font-weight: 800;
+    color: rgba(var(--color-foreground), 0.50);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-chip{
+    height: 30px;
+    padding: 0 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(15, 23, 42, 0.04);
+    font-weight: 900;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 180ms ease, background 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-chip:hover{
+    border-color: rgba(29, 91, 255, 0.30);
+    background: rgba(29, 91, 255, 0.04);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-state{
+    margin-top: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 950;
+    font-size: 13px;
+    color: rgba(var(--color-foreground), 0.74);
+    transition: color 200ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-dot{
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: rgba(148, 163, 184, 0.95);
+    box-shadow: 0 0 0 5px rgba(148, 163, 184, 0.12);
+    transition: background 300ms ease, box-shadow 300ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="good"] .tpa-lp__fit-dot{
+    background: rgba(34, 197, 94, 0.95);
+    box-shadow: 0 0 0 5px rgba(34, 197, 94, 0.12);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="good"] .tpa-lp__fit-state{
+    color: rgba(22, 163, 74, 0.95);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="warn"] .tpa-lp__fit-dot{
+    background: rgba(245, 158, 11, 0.95);
+    box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.12);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit[data-state="bad"] .tpa-lp__fit-dot{
+    background: rgba(239, 68, 68, 0.95);
+    box-shadow: 0 0 0 5px rgba(239, 68, 68, 0.12);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__fit-note{
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.55;
+    color: rgba(var(--color-foreground), 0.58);
+  }
+
+  /* Specs grid */
+  .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__spec{
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(255,255,255,0.70);
+    padding: 14px;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__spec:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(2, 6, 23, 0.06);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__spec--full{
+    grid-column: 1 / -1;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__spec-icon{
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__spec-k{
+    font-size: 11px;
+    font-weight: 950;
+    color: rgba(var(--color-foreground), 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__spec-v{
+    margin-top: 4px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(var(--color-foreground), 0.82);
+  }
+
+  /* ── QTY + ATC ── */
+  .tpa-lp--{{ sid }} .tpa-lp__buy-row{
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: 12px;
+    align-items: center;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__qty{
+    display: grid;
+    grid-template-columns: 40px 1fr 40px;
+    height: 52px;
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.85);
+    overflow: hidden;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__qty-btn{
+    border: 0;
+    background: transparent;
+    font-size: 18px;
+    font-weight: 950;
+    cursor: pointer;
+    color: rgba(var(--color-foreground), 0.78);
+    transition: background 150ms ease, color 150ms ease, transform 100ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__qty-btn:hover{
+    background: rgba(29, 91, 255, 0.06);
+    color: rgba(29, 91, 255, 0.95);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__qty-btn:active{
+    transform: scale(0.90);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__qty-input{
+    border: 0;
+    background: transparent;
+    text-align: center;
+    font-weight: 950;
+    font-size: 15px;
+    color: rgb(var(--color-foreground));
+    width: 100%;
+  }
+
+  /* ATC Button */
+  .tpa-lp--{{ sid }} .tpa-lp__atc{
+    height: 52px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.10);
+    background: rgba(29, 91, 255, 0.95);
+    color: #fff;
+    font-weight: 950;
+    font-size: 15px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 18px 44px rgba(29, 91, 255, 0.22);
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__atc:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 22px 52px rgba(29, 91, 255, 0.32), 0 0 0 1px rgba(29, 91, 255, 0.20);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__atc:active{
+    transform: translateY(0);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__atc:disabled{
+    opacity: 0.50;
+    cursor: default;
+    box-shadow: none;
+  }
+
+  /* ATC shimmer */
+  .tpa-lp--{{ sid }} .tpa-lp__atc-shimmer{
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+    animation: tpaLpShimmer{{ sid }} 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes tpaLpShimmer{{ sid }}{
+    0%{ left: -100%; }
+    45%{ left: 150%; }
+    100%{ left: 150%; }
+  }
+
+  /* ATC success state */
+  .tpa-lp--{{ sid }} .tpa-lp__atc-default{ display: inline-flex; align-items: center; gap: 8px; }
+  .tpa-lp--{{ sid }} .tpa-lp__atc-success{ display: none; align-items: center; gap: 8px; }
+  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success{
+    background: rgba(22, 163, 74, 0.95);
+    box-shadow: 0 18px 44px rgba(22, 163, 74, 0.22);
+    pointer-events: none;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success .tpa-lp__atc-default{ display: none; }
+  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success .tpa-lp__atc-success{
+    display: inline-flex;
+    animation: tpaLpAtcPop{{ sid }} 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success .tpa-lp__atc-shimmer{ animation: none; }
+  @keyframes tpaLpAtcPop{{ sid }}{
+    0%{ transform: scale(0.8); opacity: 0; }
+    100%{ transform: scale(1); opacity: 1; }
+  }
+
+  /* Shipping bar */
+  .tpa-lp--{{ sid }} .tpa-lp__ship-bar{
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: rgba(29, 91, 255, 0.03);
+    border: 1px solid rgba(29, 91, 255, 0.08);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-text{
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(var(--color-foreground), 0.68);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-track{
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-fill{
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(29, 91, 255, 0.80), rgba(34, 197, 94, 0.88));
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-fill::after{
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+    animation: tpaLpShipShimmer{{ sid }} 2.5s ease-in-out infinite;
+  }
+  @keyframes tpaLpShipShimmer{{ sid }}{
+    0%{ transform: translateX(-100%); }
+    100%{ transform: translateX(100%); }
+  }
+
+  /* Trust strip */
+  .tpa-lp--{{ sid }} .tpa-lp__trust-strip{
+    margin-top: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px 14px;
+    font-size: 12px;
+    font-weight: 800;
+    color: rgba(var(--color-foreground), 0.68);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__trust-item{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__trust-check{
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(22, 163, 74, 0.10);
+    color: rgba(22, 163, 74, 0.90);
+    font-size: 10px;
+    font-weight: 900;
+    flex-shrink: 0;
+  }
+
+  /* ── STICKY BAR ── */
+  .tpa-lp--{{ sid }} .tpa-lp__sticky{
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 20px;
+    background: rgba(255,255,255,0.96);
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 -6px 24px rgba(2, 6, 23, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    z-index: 50;
+    opacity: 0;
+    transform: translateY(100%);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+    pointer-events: none;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky.is-visible{
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky-title{
+    font-weight: 950;
+    font-size: 13px;
+    color: rgba(var(--color-foreground), 0.88);
+    line-height: 1.2;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky-price{
+    font-weight: 950;
+    font-size: 13px;
+    color: rgba(var(--color-foreground), 0.68);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky-save{
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(239, 68, 68, 0.90);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky-atc{
+    height: 44px;
+    padding: 0 20px;
+    border-radius: 12px;
+    border: none;
+    background: rgba(29, 91, 255, 0.95);
+    color: #fff;
+    font-weight: 950;
+    font-size: 13px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 8px 20px rgba(29, 91, 255, 0.22);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky-atc:hover{
+    transform: translateY(-1px);
+    box-shadow: 0 12px 28px rgba(29, 91, 255, 0.30);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky-atc:disabled{
+    opacity: 0.50;
+    cursor: default;
+  }
+
+  /* ── 3. SOCIAL PROOF BAR ── */
+  .tpa-lp--{{ sid }} .tpa-lp__proof-bar{
+    margin-top: 32px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+    align-items: center;
+    gap: 0;
+    padding: 22px 28px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #06122C, #0B1D40);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow:
+      0 20px 50px rgba(2, 6, 23, 0.16),
+      0 6px 18px rgba(2, 6, 23, 0.10);
+    color: #fff;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__proof-item{
+    text-align: center;
+    padding: 6px 12px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__proof-num{
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: clamp(20px, 2.5vw, 28px);
+    line-height: 1.1;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__proof-label{
+    margin-top: 4px;
+    font-size: 12px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.58);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__proof-divider{
+    width: 1px;
+    height: 36px;
+    background: rgba(255,255,255,0.12);
+  }
+
+  /* ── 4. GUARANTEES ── */
+  .tpa-lp--{{ sid }} .tpa-lp__guarantees{
+    margin-top: 32px;
+    padding: 28px;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.92);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantees-header{
+    text-align: center;
+    margin-bottom: 22px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantees-pill{
+    display: inline-flex;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.18);
+    font-weight: 950;
+    font-size: 12px;
+    color: rgba(16, 185, 129, 0.90);
+    letter-spacing: 0.06em;
+    margin-bottom: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__section-title{
+    margin: 0;
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    font-size: clamp(24px, 3vw, 36px);
+    color: rgb(var(--color-foreground));
+    line-height: 1.15;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantees-grid{
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantee{
+    text-align: center;
+    padding: 18px 12px;
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    background: rgba(255,255,255,0.50);
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease, border-color 260ms ease;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantee.is-revealed{
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantee:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 12px 30px rgba(2, 6, 23, 0.08);
+    border-color: rgba(29, 91, 255, 0.12);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantee-icon{
+    font-size: 28px;
+    margin-bottom: 10px;
+    display: block;
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantee:hover .tpa-lp__guarantee-icon{
+    transform: scale(1.15) rotate(-5deg);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantee-title{
+    font-weight: 950;
+    font-size: 14px;
+    color: rgb(var(--color-foreground));
+    margin-bottom: 6px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__guarantee-desc{
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(var(--color-foreground), 0.62);
+  }
+
+  /* ── 5. DETAILS GRID ── */
+  .tpa-lp--{{ sid }} .tpa-lp__details-grid{
+    margin-top: 24px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__detail-card{
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.88);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+    padding: 20px;
+    transition: transform 260ms ease, box-shadow 260ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__detail-card:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 22px 56px rgba(2, 6, 23, 0.10), 0 6px 18px rgba(2, 6, 23, 0.06);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__detail-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__detail-icon{
+    font-size: 18px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__detail-title{
+    font-weight: 950;
+    font-size: 14px;
+    color: rgb(var(--color-foreground));
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__detail-body{
+    display: grid;
+    gap: 8px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__benefit{
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(var(--color-foreground), 0.74);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__benefit-check{
+    width: 18px;
+    height: 18px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29, 91, 255, 0.08);
+    color: rgba(29, 91, 255, 0.80);
+    font-size: 10px;
+    font-weight: 900;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rich{
+    font-size: 13px;
+    line-height: 1.65;
+    color: rgba(var(--color-foreground), 0.74);
+  }
+
+  /* ── 6. RISK BANNER ── */
+  .tpa-lp--{{ sid }} .tpa-lp__risk-banner{
+    margin-top: 24px;
+    padding: 24px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #06122C, #0B1D40);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+    color: #fff;
+    box-shadow: 0 18px 50px rgba(2, 6, 23, 0.14);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__risk-icon{
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__risk-text{
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: clamp(16px, 2vw, 22px);
+    line-height: 1.35;
+    color: rgba(255,255,255,0.92);
+  }
+
+  /* ── 7. REVIEWS ── */
+  .tpa-lp--{{ sid }} .tpa-lp__reviews{
+    margin-top: 32px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__reviews-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__reviews-summary{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__reviews-avg{
+    font-size: 13px;
+    font-weight: 800;
+    color: rgba(var(--color-foreground), 0.65);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__reviews-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review{
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.92);
+    box-shadow:
+      0 14px 40px rgba(2, 6, 23, 0.08),
+      0 4px 12px rgba(2, 6, 23, 0.04);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease, border-color 260ms ease;
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review.is-revealed{
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 260ms ease, border-color 260ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 18px 48px rgba(2, 6, 23, 0.12), 0 6px 16px rgba(2, 6, 23, 0.06);
+    border-color: rgba(29, 91, 255, 0.12);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-top{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-verified{
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 900;
+    font-size: 11px;
+    color: rgba(29, 91, 255, 0.85);
+    white-space: nowrap;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-badge{
+    width: 16px;
+    height: 16px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(29, 91, 255, 0.10);
+    border: 1px solid rgba(29, 91, 255, 0.20);
+    font-size: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-headline{
+    font-weight: 950;
+    font-size: 14px;
+    color: rgb(var(--color-foreground));
+    line-height: 1.3;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-quote{
+    font-size: 13px;
+    line-height: 1.6;
+    color: rgba(var(--color-foreground), 0.74);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-footer{
+    margin-top: auto;
+    padding-top: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-name{
+    font-weight: 900;
+    font-size: 13px;
+    color: rgb(var(--color-foreground));
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__review-loc{
+    font-size: 12px;
+    color: rgba(var(--color-foreground), 0.55);
+    margin-top: 2px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__reviews-note{
+    margin-top: 12px;
+    font-size: 13px;
+    color: rgba(var(--color-foreground), 0.60);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__reviews-placeholder{
+    margin-top: 8px;
+    font-size: 12px;
+    color: rgba(var(--color-foreground), 0.50);
+  }
+
+  /* ── 8. FAQ ── */
+  .tpa-lp--{{ sid }} .tpa-lp__faq{
+    margin-top: 32px;
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.90);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+    padding: 24px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-subtitle{
+    margin-top: 6px;
+    font-size: 14px;
+    color: rgba(var(--color-foreground), 0.60);
+    margin-bottom: 16px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-list{
+    display: grid;
+    gap: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-item{
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+    padding: 14px 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-item:first-of-type{
+    border-top: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-q{
+    font-weight: 950;
+    font-size: 14px;
+    cursor: pointer;
+    color: rgba(var(--color-foreground), 0.86);
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 4px 0;
+    transition: color 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-q::-webkit-details-marker{ display: none; }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-q::after{
+    content: '+';
+    font-size: 22px;
+    font-weight: 600;
+    color: rgba(var(--color-foreground), 0.35);
+    transition: transform 250ms ease, color 250ms ease;
+    flex-shrink: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-item[open] .tpa-lp__faq-q::after{
+    content: '−';
+    color: rgba(29, 91, 255, 0.80);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-q:hover{
+    color: rgba(var(--color-foreground), 1);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__faq-a{
+    margin-top: 8px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: rgba(var(--color-foreground), 0.68);
+    animation: tpaLpFaqOpen{{ sid }} 0.3s ease;
+  }
+  @keyframes tpaLpFaqOpen{{ sid }}{
+    from{ opacity: 0; transform: translateY(-6px); }
+    to{ opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── 9. FINAL CTA ── */
+  .tpa-lp--{{ sid }} .tpa-lp__final-cta{
+    margin-top: 32px;
+    padding: 36px 28px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #06122C, #0B1D40);
+    border: 1px solid rgba(255,255,255,0.08);
+    text-align: center;
+    color: #fff;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(2, 6, 23, 0.16);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__final-orb{
+    position: absolute;
+    top: -80px;
+    right: -60px;
+    width: 400px;
+    height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(29,91,255,0.20) 0%, rgba(29,91,255,0) 70%);
+    animation: tpaLpOrbFloat{{ sid }} 8s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+  @keyframes tpaLpOrbFloat{{ sid }}{
+    0%{ transform: translate(0, 0) scale(1); }
+    100%{ transform: translate(-30px, 20px) scale(1.1); }
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__final-content{
+    position: relative;
+    z-index: 1;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__final-title{
+    font-weight: 950;
+    letter-spacing: -0.03em;
+    font-size: clamp(22px, 3vw, 34px);
+    line-height: 1.15;
+    margin-bottom: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__final-sub{
+    font-size: 15px;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 22px;
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__final-btn{
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    height: 52px;
+    padding: 0 28px;
+    border-radius: 14px;
+    background: rgba(29, 91, 255, 0.95);
+    color: #fff;
+    font-weight: 950;
+    font-size: 15px;
+    text-decoration: none;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 14px 36px rgba(29, 91, 255, 0.28);
+    transition: transform 180ms ease, box-shadow 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__final-btn:hover{
+    transform: translateY(-2px);
+    box-shadow: 0 18px 44px rgba(29, 91, 255, 0.38);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__final-btn-shimmer{
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+    animation: tpaLpShimmer{{ sid }} 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  /* ══════════ RESPONSIVE ══════════ */
+  @media (max-width: 980px){
+    .tpa-lp--{{ sid }} .tpa-lp__hero{
+      grid-template-columns: 1fr;
+      gap: 22px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__proof-bar{
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__proof-divider{
+      display: none;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__guarantees-grid{
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__details-grid{
+      grid-template-columns: 1fr;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
+      grid-template-columns: 1fr 1fr;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__buy-row{
+      grid-template-columns: 1fr;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__trust-strip{
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 640px){
+    .tpa-lp--{{ sid }} .tpa-lp__proof-bar{
+      grid-template-columns: 1fr 1fr;
+      padding: 18px 16px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__guarantees-grid{
+      grid-template-columns: 1fr;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__reviews-grid{
+      grid-template-columns: 1fr;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* ══════════ REDUCED MOTION ══════════ */
+  @media (prefers-reduced-motion: reduce){
+    .tpa-lp--{{ sid }} .tpa-lp__announce-dot,
+    .tpa-lp--{{ sid }} .tpa-lp__activity-dot,
+    .tpa-lp--{{ sid }} .tpa-lp__stock-dot,
+    .tpa-lp--{{ sid }} .tpa-lp__media-badge-dot{
+      animation: none;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__sale-flag{
+      animation: none;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__atc-shimmer,
+    .tpa-lp--{{ sid }} .tpa-lp__final-btn-shimmer,
+    .tpa-lp--{{ sid }} .tpa-lp__final-orb{
+      animation: none;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__ship-fill::after{
+      animation: none;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__guarantee,
+    .tpa-lp--{{ sid }} .tpa-lp__review{
+      opacity: 1;
+      transform: none;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__sticky{
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+(function(){
+  var sid = {{ sid | json }};
+  var root = document.querySelector('.tpa-lp--' + sid);
+  if (!root) return;
+
+  /* ── Quantity picker ── */
+  var dec = root.querySelector('[data-tpa-lp-qty-dec]');
+  var inc = root.querySelector('[data-tpa-lp-qty-inc]');
+  var qty = root.querySelector('[data-tpa-lp-qty-input]');
+  if (dec && inc && qty){
+    dec.addEventListener('click', function(){
+      qty.value = Math.max(1, parseInt(qty.value || '1', 10) - 1);
+    });
+    inc.addEventListener('click', function(){
+      qty.value = Math.max(1, parseInt(qty.value || '1', 10) + 1);
+    });
+  }
+
+  /* ── ATC with AJAX + success animation ── */
+  var atcBtn = root.querySelector('[data-tpa-lp-atc]');
+  var form = root.querySelector('[data-tpa-lp-form]');
+  if (atcBtn && form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      if (atcBtn.disabled || atcBtn.classList.contains('is-success')) return;
+      atcBtn.classList.add('is-success');
+
+      var formData = new FormData(form);
+      fetch('{{ routes.cart_add_url }}.js', {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+      }).then(function(r){ return r.json(); })
+      .then(function(){
+        setTimeout(function(){
+          atcBtn.classList.remove('is-success');
+        }, 2200);
+      })
+      .catch(function(){
+        atcBtn.classList.remove('is-success');
+        form.submit();
+      });
+    });
+  }
+
+  /* ── Sticky bar: show when ATC scrolls out of view ── */
+  var sticky = root.querySelector('[data-tpa-lp-sticky]');
+  if (sticky && atcBtn){
+    var stickyObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          sticky.classList.remove('is-visible');
+        } else {
+          sticky.classList.add('is-visible');
+        }
+      });
+    }, { threshold: 0 });
+    stickyObs.observe(atcBtn);
+  }
+
+  /* ── Gallery thumbnail switching ── */
+  var stage = root.querySelector('[data-tpa-lp-stage]');
+  var thumbs = root.querySelectorAll('[data-tpa-lp-thumb]');
+  if (stage && thumbs.length > 1){
+    thumbs.forEach(function(thumb){
+      thumb.addEventListener('click', function(){
+        thumbs.forEach(function(t){ t.classList.remove('is-active'); });
+        thumb.classList.add('is-active');
+        stage.classList.add('is-switching');
+        setTimeout(function(){
+          stage.classList.remove('is-switching');
+        }, 300);
+      });
+    });
+  }
+
+  /* ── Fit checker ── */
+  var fit = root.querySelector('[data-tpa-lp-fit]');
+  if (fit){
+    var fitInput = root.querySelector('[data-tpa-lp-fit-input]');
+    var fitCheck = root.querySelector('[data-tpa-lp-fit-check]');
+    var fitText = root.querySelector('[data-tpa-lp-fit-text]');
+
+    function setFitState(state, label){
+      fit.setAttribute('data-state', state);
+      if (fitText) fitText.textContent = label;
+    }
+
+    function evaluateFit(value){
+      var v = (value || '').trim();
+      if (v.length < 3){
+        setFitState('warn', {{ section.settings.fit_state_warn | json }});
+        return;
+      }
+      var chips = Array.prototype.slice.call(root.querySelectorAll('[data-tpa-lp-fit-chip]'));
+      var match = chips.some(function(b){
+        return (b.getAttribute('data-tpa-lp-fit-chip') || '').toLowerCase() === v.toLowerCase();
+      });
+      if (match){
+        setFitState('good', {{ section.settings.fit_state_good | json }});
+      } else {
+        setFitState('bad', {{ section.settings.fit_state_bad | json }});
+      }
+    }
+
+    if (fitCheck) fitCheck.addEventListener('click', function(){ evaluateFit(fitInput.value); });
+    if (fitInput) fitInput.addEventListener('input', function(){ evaluateFit(fitInput.value); });
+
+    root.addEventListener('click', function(e){
+      var chip = e.target.closest('.tpa-lp__fit-chip');
+      if (!chip) return;
+      var val = chip.getAttribute('data-tpa-lp-fit-chip') || chip.textContent;
+      if (fitInput) fitInput.value = val;
+      evaluateFit(val);
+    });
+
+    setFitState('warn', {{ section.settings.fit_state_default | json }});
+  }
+
+  /* ── Scroll-triggered reveals (guarantees + reviews) ── */
+  var revealEls = root.querySelectorAll('[data-tpa-lp-reveal]');
+  if (revealEls.length && 'IntersectionObserver' in window){
+    var revealObs = new IntersectionObserver(function(entries){
+      entries.forEach(function(entry){
+        if (entry.isIntersecting){
+          var siblings = entry.target.parentElement.querySelectorAll('[data-tpa-lp-reveal]');
+          var idx = Array.prototype.indexOf.call(siblings, entry.target);
+          setTimeout(function(){
+            entry.target.classList.add('is-revealed');
+          }, idx * 100);
+          revealObs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(function(el){ revealObs.observe(el); });
+  } else {
+    revealEls.forEach(function(el){ el.classList.add('is-revealed'); });
+  }
+
+  /* ── Announcement bar rotation ── */
+  var announceText = document.querySelector('[data-tpa-lp-announce-text]');
+  if (announceText){
+    var messages = [
+      {{ section.settings.announce_text | json }},
+      {{ section.settings.announce_text_2 | json }},
+      {{ section.settings.announce_text_3 | json }}
+    ].filter(function(m){ return m && m.length > 0; });
+
+    if (messages.length > 1){
+      var msgIdx = 0;
+      setInterval(function(){
+        msgIdx = (msgIdx + 1) % messages.length;
+        announceText.style.opacity = '0';
+        announceText.style.transform = 'translateY(-4px)';
+        setTimeout(function(){
+          announceText.textContent = messages[msgIdx];
+          announceText.style.opacity = '1';
+          announceText.style.transform = 'translateY(0)';
+        }, 250);
+      }, 4000);
+      announceText.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+    }
+  }
+
+  /* ── Activity indicator rotation ── */
+  var activityText = root.querySelector('[data-tpa-lp-activity-text]');
+  if (activityText){
+    var activities = [
+      {{ section.settings.activity_text | json }},
+      {{ section.settings.activity_text_2 | json }},
+      {{ section.settings.activity_text_3 | json }}
+    ].filter(function(m){ return m && m.length > 0; });
+
+    if (activities.length > 1){
+      var actIdx = 0;
+      setInterval(function(){
+        actIdx = (actIdx + 1) % activities.length;
+        activityText.style.opacity = '0';
+        setTimeout(function(){
+          activityText.textContent = activities[actIdx];
+          activityText.style.opacity = '1';
+        }, 200);
+      }, 5000);
+      activityText.style.transition = 'opacity 0.2s ease';
+    }
+  }
+
+  /* ── Smooth scroll for anchor links ── */
+  root.querySelectorAll('a[href^="#tpa-lp"]').forEach(function(link){
+    link.addEventListener('click', function(e){
+      var target = document.querySelector(link.getAttribute('href'));
+      if (target){
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  /* ── Final CTA scroll-to-top ── */
+  var finalBtn = root.querySelector('.tpa-lp__final-btn');
+  if (finalBtn){
+    finalBtn.addEventListener('click', function(e){
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+})();
+</script>
+
+{% schema %}
+{
+  "name": "TPA Landing Product Page",
+  "settings": [
+    { "type": "color_scheme", "id": "color_scheme", "label": "Color scheme", "default": "scheme-1" },
+
+    { "type": "header", "content": "Announcement bar" },
+    { "type": "text", "id": "announce_text", "label": "Announce text 1", "default": "🔥 Free AU Shipping on Orders Over $75 — Limited Time" },
+    { "type": "text", "id": "announce_text_2", "label": "Announce text 2 (rotates)", "default": "⚡ 50,000+ Parts Sold — Australia's Trusted Parts Specialist" },
+    { "type": "text", "id": "announce_text_3", "label": "Announce text 3 (rotates)", "default": "✓ Perfect Fit Guarantee — We Confirm Compatibility Before Dispatch" },
+
+    { "type": "header", "content": "Above the fold" },
+    { "type": "checkbox", "id": "media_badge_enable", "label": "Show media badge", "default": true },
+    { "type": "text", "id": "media_badge_text", "label": "Media badge text", "default": "Quality Assured" },
+
+    { "type": "text", "id": "activity_text", "label": "Activity text 1", "default": "12 people viewing this right now" },
+    { "type": "text", "id": "activity_text_2", "label": "Activity text 2 (rotates)", "default": "Sold 6 times in the last 24 hours" },
+    { "type": "text", "id": "activity_text_3", "label": "Activity text 3 (rotates)", "default": "Last ordered 14 minutes ago" },
+
+    { "type": "text", "id": "part_subheadline_fallback", "label": "Part subheadline fallback", "default": "Restore performance with a verified replacement part, backed by Australian support." },
+    { "type": "text", "id": "appliance_subheadline_fallback", "label": "Appliance subheadline fallback", "default": "Premium performance, quality checked, backed by Australian support." },
+
+    { "type": "range", "id": "rating_stars", "label": "Rating stars", "min": 1, "max": 5, "step": 1, "default": 5 },
+    { "type": "text", "id": "rating_count", "label": "Review count text", "default": "127" },
+
+    { "type": "text", "id": "price_note", "label": "Price note", "default": "Tax included. Shipping calculated at checkout." },
+
+    { "type": "header", "content": "Stock urgency" },
+    { "type": "checkbox", "id": "stock_urgency_enable", "label": "Show stock urgency", "default": true },
+    { "type": "text", "id": "stock_text", "label": "Stock urgency text", "default": "Only 8 left in stock — order soon" },
+
+    { "type": "header", "content": "Cart and shipping" },
+    { "type": "text", "id": "atc_label", "label": "Add to cart label", "default": "Add to Cart — Ships Fast" },
+    { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold Out" },
+    { "type": "range", "id": "free_ship_threshold", "label": "Free shipping threshold ($)", "min": 25, "max": 200, "step": 5, "default": 75 },
+
+    { "type": "header", "content": "Trust strip" },
+    { "type": "text", "id": "trust_part_1", "label": "Parts trust 1", "default": "Perfect Fit Guarantee" },
+    { "type": "text", "id": "trust_part_2", "label": "Parts trust 2", "default": "Fast AU Dispatch" },
+    { "type": "text", "id": "trust_part_3", "label": "Parts trust 3", "default": "30-Day Returns" },
+    { "type": "text", "id": "trust_part_4", "label": "Parts trust 4", "default": "AU Support Team" },
+    { "type": "text", "id": "trust_app_1", "label": "Appliances trust 1", "default": "Quality Assured" },
+    { "type": "text", "id": "trust_app_2", "label": "Appliances trust 2", "default": "Fast AU Shipping" },
+    { "type": "text", "id": "trust_app_3", "label": "Appliances trust 3", "default": "30-Day Returns" },
+    { "type": "text", "id": "trust_app_4", "label": "Appliances trust 4", "default": "Australian Support" },
+
+    { "type": "header", "content": "Parts compatibility module" },
+    { "type": "text", "id": "fit_title", "label": "Fit title", "default": "Check Fit For Your Model" },
+    { "type": "text", "id": "fit_placeholder", "label": "Fit placeholder", "default": "Enter your model number" },
+    { "type": "text", "id": "fit_btn", "label": "Fit button", "default": "Check Fit" },
+    { "type": "text", "id": "fit_state_default", "label": "Fit default state", "default": "Enter model to verify" },
+    { "type": "text", "id": "fit_state_good", "label": "Fit verified state", "default": "Verified Compatible ✓" },
+    { "type": "text", "id": "fit_state_warn", "label": "Fit warn state", "default": "Enter model to verify" },
+    { "type": "text", "id": "fit_state_bad", "label": "Fit contact state", "default": "Contact Support to Confirm" },
+    { "type": "text", "id": "fit_note", "label": "Fit note fallback", "default": "Our team confirms compatibility before dispatch if required. Zero risk." },
+
+    { "type": "header", "content": "Appliance specs" },
+    { "type": "text", "id": "specs_title", "label": "Specs title", "default": "Key Specifications" },
+    { "type": "text", "id": "specs_warranty_label", "label": "Warranty label", "default": "Warranty" },
+    { "type": "text", "id": "specs_warranty_fallback", "label": "Warranty fallback", "default": "Included with purchase" },
+    { "type": "text", "id": "specs_shipping_label", "label": "Shipping label", "default": "Shipping" },
+    { "type": "text", "id": "specs_shipping_fallback", "label": "Shipping fallback", "default": "Fast AU shipping with tracking" },
+    { "type": "text", "id": "specs_setup_label", "label": "Setup label", "default": "Setup" },
+    { "type": "text", "id": "specs_setup_fallback", "label": "Setup fallback", "default": "Quick start guide included" },
+    { "type": "text", "id": "specs_key_label", "label": "Key label", "default": "Details" },
+    { "type": "richtext", "id": "specs_key_fallback", "label": "Specs fallback", "default": "<p>See product description for full specifications.</p>" },
+
+    { "type": "header", "content": "Social proof bar" },
+    { "type": "text", "id": "proof_1_num", "label": "Proof 1 number", "default": "50,000+" },
+    { "type": "text", "id": "proof_1_label", "label": "Proof 1 label", "default": "Parts Sold" },
+    { "type": "text", "id": "proof_2_num", "label": "Proof 2 number", "default": "4.8/5" },
+    { "type": "text", "id": "proof_2_label", "label": "Proof 2 label", "default": "Avg Rating" },
+    { "type": "text", "id": "proof_3_num", "label": "Proof 3 number", "default": "30 Day" },
+    { "type": "text", "id": "proof_3_label", "label": "Proof 3 label", "default": "Returns" },
+    { "type": "text", "id": "proof_4_num", "label": "Proof 4 number", "default": "100%" },
+    { "type": "text", "id": "proof_4_label", "label": "Proof 4 label", "default": "AU Support" },
+
+    { "type": "header", "content": "Guarantee section" },
+    { "type": "text", "id": "guarantee_title", "label": "Guarantee title", "default": "Our Promise to You" },
+    { "type": "text", "id": "guarantee_1_title", "label": "Guarantee 1 title", "default": "Perfect Fit Guarantee" },
+    { "type": "text", "id": "guarantee_1_desc", "label": "Guarantee 1 desc", "default": "We verify compatibility before dispatch. If it doesn't fit, we fix it — no questions asked." },
+    { "type": "text", "id": "guarantee_2_title", "label": "Guarantee 2 title", "default": "Fast AU Shipping" },
+    { "type": "text", "id": "guarantee_2_desc", "label": "Guarantee 2 desc", "default": "Dispatched fast from Australia with tracking. Most orders arrive within days, not weeks." },
+    { "type": "text", "id": "guarantee_3_title", "label": "Guarantee 3 title", "default": "30-Day Returns" },
+    { "type": "text", "id": "guarantee_3_desc", "label": "Guarantee 3 desc", "default": "Changed your mind? No problem. Return within 30 days for a full refund. Zero hassle." },
+    { "type": "text", "id": "guarantee_4_title", "label": "Guarantee 4 title", "default": "Australian Support" },
+    { "type": "text", "id": "guarantee_4_desc", "label": "Guarantee 4 desc", "default": "Real people, real help. Our Australian team is here before and after your purchase." },
+
+    { "type": "header", "content": "Benefits" },
+    { "type": "text", "id": "benefits_title", "label": "Benefits title", "default": "Why This Part" },
+    { "type": "text", "id": "benefit_part_1", "label": "Part benefit 1", "default": "Restores full performance to your appliance" },
+    { "type": "text", "id": "benefit_part_2", "label": "Part benefit 2", "default": "Verified compatibility — checked before dispatch" },
+    { "type": "text", "id": "benefit_part_3", "label": "Part benefit 3", "default": "Premium quality materials built to last" },
+    { "type": "text", "id": "benefit_part_4", "label": "Part benefit 4", "default": "Easy install — most take under 5 minutes" },
+    { "type": "text", "id": "benefit_part_5", "label": "Part benefit 5", "default": "Backed by Australian support if you need help" },
+    { "type": "text", "id": "benefit_app_1", "label": "App benefit 1", "default": "Performance you feel every day" },
+    { "type": "text", "id": "benefit_app_2", "label": "App benefit 2", "default": "Premium feature set at exceptional value" },
+    { "type": "text", "id": "benefit_app_3", "label": "App benefit 3", "default": "Energy efficient operation" },
+    { "type": "text", "id": "benefit_app_4", "label": "App benefit 4", "default": "Full warranty coverage included" },
+    { "type": "text", "id": "benefit_app_5", "label": "App benefit 5", "default": "Australian support when you need it" },
+
+    { "type": "text", "id": "included_title", "label": "What's included title", "default": "What's in the Box" },
+    { "type": "richtext", "id": "included_fallback", "label": "Included fallback", "default": "<p>Set the \"What's included\" metafield on this product for exact box contents.</p>" },
+
+    { "type": "header", "content": "Risk reversal" },
+    { "type": "text", "id": "risk_part", "label": "Parts risk statement", "default": "We only sell parts verified for compatibility. If it's not right, we fix it — that's our guarantee." },
+    { "type": "text", "id": "risk_app", "label": "Appliances risk statement", "default": "Every appliance is quality checked and backed by our Australian support team. Buy with confidence." },
+
+    { "type": "header", "content": "Reviews" },
+    { "type": "text", "id": "reviews_title", "label": "Reviews title", "default": "What Customers Say" },
+    { "type": "text", "id": "reviews_note", "label": "Reviews note", "default": "All reviews are from verified Australian customers." },
+    { "type": "text", "id": "reviews_placeholder", "label": "Reviews placeholder", "default": "Connect your reviews app block under this section for live reviews." },
+
+    { "type": "header", "content": "FAQ" },
+    { "type": "text", "id": "faq_title", "label": "FAQ title", "default": "Common Questions" },
+    { "type": "text", "id": "faq_subtitle", "label": "FAQ subtitle", "default": "Everything you need to know before ordering." },
+
+    { "type": "text", "id": "faq_part_q1", "label": "Parts Q1", "default": "How do I know this part fits my appliance?" },
+    { "type": "text", "id": "faq_part_a1", "label": "Parts A1", "default": "Use the model checker above to verify instantly. If your model isn't listed, contact our support team — we confirm compatibility before dispatch so you never receive the wrong part." },
+    { "type": "text", "id": "faq_part_q2", "label": "Parts Q2", "default": "How long does shipping take?" },
+    { "type": "text", "id": "faq_part_a2", "label": "Parts A2", "default": "We dispatch fast from Australia. Most metro orders arrive in 2-5 business days. Tracking is provided with every order." },
+    { "type": "text", "id": "faq_part_q3", "label": "Parts Q3", "default": "Is installation difficult?" },
+    { "type": "text", "id": "faq_part_a3", "label": "Parts A3", "default": "Most parts install in under 5 minutes with no tools required. If you need help, our support team can guide you through the process." },
+    { "type": "text", "id": "faq_part_q4", "label": "Parts Q4", "default": "What if the part doesn't fit?" },
+    { "type": "text", "id": "faq_part_a4", "label": "Parts A4", "default": "Our Perfect Fit Guarantee has you covered. If the part doesn't fit, we'll send the correct one or provide a full refund — no questions asked." },
+    { "type": "text", "id": "faq_part_q5", "label": "Parts Q5", "default": "Can I return it if I change my mind?" },
+    { "type": "text", "id": "faq_part_a5", "label": "Parts A5", "default": "Absolutely. We offer 30-day returns on all products. Contact our Australian support team and we'll sort it quickly." },
+
+    { "type": "text", "id": "faq_app_q1", "label": "App Q1", "default": "What warranty is included?" },
+    { "type": "text", "id": "faq_app_a1", "label": "App A1", "default": "Full warranty details are shown in the specifications above and included with your order. Our team is here to help with any warranty claims." },
+    { "type": "text", "id": "faq_app_q2", "label": "App Q2", "default": "How is delivery handled?" },
+    { "type": "text", "id": "faq_app_a2", "label": "App A2", "default": "Fast AU shipping with full tracking. Most metro deliveries arrive in 2-5 business days. We'll keep you updated every step." },
+    { "type": "text", "id": "faq_app_q3", "label": "App Q3", "default": "Do I need professional installation?" },
+    { "type": "text", "id": "faq_app_a3", "label": "App A3", "default": "Most appliances are plug and play. Setup guidance is provided where relevant. Our support team is available if you need help." },
+    { "type": "text", "id": "faq_app_q4", "label": "App Q4", "default": "What if I need support after purchase?" },
+    { "type": "text", "id": "faq_app_a4", "label": "App A4", "default": "Our Australian support team is here for you. Contact us with your order number and we'll help quickly — before and after your purchase." },
+    { "type": "text", "id": "faq_app_q5", "label": "App Q5", "default": "What is your returns policy?" },
+    { "type": "text", "id": "faq_app_a5", "label": "App A5", "default": "30-day hassle-free returns on all products. Contact our team and we'll make it right." },
+
+    { "type": "header", "content": "Final CTA" },
+    { "type": "text", "id": "final_cta_title", "label": "Final CTA title", "default": "Ready to Fix Your Appliance?" },
+    { "type": "text", "id": "final_cta_sub", "label": "Final CTA subtitle", "default": "Verified parts. Fast AU shipping. 30-day returns. Backed by real Australian support." },
+    { "type": "text", "id": "final_cta_btn", "label": "Final CTA button", "default": "Order Now — Scroll to Top" }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        { "type": "range", "id": "stars", "label": "Stars", "min": 1, "max": 5, "step": 1, "default": 5 },
+        { "type": "text", "id": "headline", "label": "Headline (optional)", "default": "Perfect fit, works like new" },
+        { "type": "textarea", "id": "quote", "label": "Quote", "default": "Fit my Dyson perfectly, took 2 minutes to install. Vacuum works like new again. Wish I'd found this site sooner." },
+        { "type": "text", "id": "name", "label": "Name", "default": "Sarah M." },
+        { "type": "text", "id": "location", "label": "Location", "default": "Melbourne, VIC" },
+        { "type": "checkbox", "id": "verified", "label": "Verified badge", "default": true }
+      ]
+    }
+  ],
+  "max_blocks": 20,
+  "presets": [
+    {
+      "name": "TPA Landing Product Page",
+      "blocks": [
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "headline": "Perfect fit, works like new",
+            "quote": "Fit my Dyson V10 perfectly, took 2 minutes to install. Vacuum works like new again. Wish I'd found this site sooner.",
+            "name": "Sarah M.",
+            "location": "Melbourne, VIC",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "headline": "TM6 blending perfectly again",
+            "quote": "The Thermomix blade was identical to the original. My TM6 is blending perfectly again. Fast shipping to Sydney too.",
+            "name": "James T.",
+            "location": "Sydney, NSW",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "headline": "Barista Express pulling perfect shots",
+            "quote": "Breville descaler kit arrived next day. My Barista Express is pulling shots like day one. Great value bundle pricing.",
+            "name": "Michelle K.",
+            "location": "Brisbane, QLD",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "headline": "Back to full suction",
+            "quote": "Ecovacs filters and brushes fit perfectly. Robot vacuum is back to full suction. Clear model guide made it easy to find the right part.",
+            "name": "Tom R.",
+            "location": "Perth, WA",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "headline": "Incredibly fast delivery",
+            "quote": "Ordered at night, shipped next morning. Part arrived fast and the support team helped me confirm it was the right one before I bought.",
+            "name": "Nina P.",
+            "location": "Adelaide, SA",
+            "verified": true
+          }
+        },
+        {
+          "type": "review",
+          "settings": {
+            "stars": 5,
+            "headline": "Saved hundreds vs a new appliance",
+            "quote": "Was about to buy a whole new vacuum for $800. This $35 part fixed it completely. The Part Authority saved me a fortune. Absolute legend.",
+            "name": "David L.",
+            "location": "Gold Coast, QLD",
+            "verified": true
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
