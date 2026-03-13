@@ -80,6 +80,11 @@
                 <span>SAVE {{ compare | minus: price | money }}</span>
               </div>
             {% endif %}
+
+            {% if product.media.size > 1 %}
+              <button class="tpa-lp__stage-nav tpa-lp__stage-nav--prev" type="button" data-tpa-lp-stage-prev aria-label="Previous image">‹</button>
+              <button class="tpa-lp__stage-nav tpa-lp__stage-nav--next" type="button" data-tpa-lp-stage-next aria-label="Next image">›</button>
+            {% endif %}
           </div>
 
           <div class="tpa-lp__media-templates" hidden>
@@ -108,26 +113,30 @@
 
         {% assign media_count = product.media.size %}
         {% if media_count > 1 %}
-          <div class="tpa-lp__thumbs" aria-label="Product media">
-            {% for media in product.media %}
-              <button
-                class="tpa-lp__thumb{% if media.id == featured.id %} is-active{% endif %}"
-                type="button"
-                data-tpa-lp-thumb
-                data-media-id="{{ media.id }}"
-                aria-label="View media {{ forloop.index }}"
-              >
-                {% if media.preview_image %}
-                  <img
-                    src="{{ media.preview_image | image_url: width: 220 }}"
-                    alt="{{ media.preview_image.alt | default: product.title | escape }}"
-                    loading="lazy"
-                    width="84"
-                    height="84"
-                  >
-                {% endif %}
-              </button>
-            {% endfor %}
+          <div class="tpa-lp__thumbs-wrap" data-tpa-lp-thumbs-wrap>
+            <button class="tpa-lp__thumbs-arrow tpa-lp__thumbs-arrow--prev" type="button" data-tpa-lp-thumbs-prev aria-label="Scroll thumbnails left">‹</button>
+            <div class="tpa-lp__thumbs" aria-label="Product media" data-tpa-lp-thumbs-scroll>
+              {% for media in product.media %}
+                <button
+                  class="tpa-lp__thumb{% if media.id == featured.id %} is-active{% endif %}"
+                  type="button"
+                  data-tpa-lp-thumb
+                  data-media-id="{{ media.id }}"
+                  aria-label="View media {{ forloop.index }}"
+                >
+                  {% if media.preview_image %}
+                    <img
+                      src="{{ media.preview_image | image_url: width: 220 }}"
+                      alt="{{ media.preview_image.alt | default: product.title | escape }}"
+                      loading="lazy"
+                      width="84"
+                      height="84"
+                    >
+                  {% endif %}
+                </button>
+              {% endfor %}
+            </div>
+            <button class="tpa-lp__thumbs-arrow tpa-lp__thumbs-arrow--next" type="button" data-tpa-lp-thumbs-next aria-label="Scroll thumbnails right">›</button>
           </div>
         {% endif %}
       </div>
@@ -760,6 +769,88 @@
     50%{ box-shadow: 0 8px 20px rgba(239, 68, 68, 0.25), 0 0 0 5px rgba(239, 68, 68, 0.12); }
   }
 
+  /* ── Stage (main image) navigation arrows ── */
+  .tpa-lp--{{ sid }} .tpa-lp__stage-nav{
+    display: none;
+  }
+  @media (min-width: 981px){
+    .tpa-lp--{{ sid }} .tpa-lp__stage-nav{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: rgba(15, 23, 42, 0.75);
+      font-size: 22px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      z-index: 4;
+      transition: background 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      padding: 0;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__stage-nav:hover{
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__stage-nav--prev{
+      left: 12px;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__stage-nav--next{
+      right: 12px;
+    }
+  }
+
+  /* ── Thumbnail carousel wrapper + scroll arrows ── */
+  .tpa-lp--{{ sid }} .tpa-lp__thumbs-wrap{
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-top: 12px;
+    position: relative;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__thumbs-arrow{
+    display: none;
+  }
+  @media (min-width: 981px){
+    .tpa-lp--{{ sid }} .tpa-lp__thumbs-arrow{
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 1px solid rgba(15, 23, 42, 0.10);
+      background: rgba(255, 255, 255, 0.90);
+      color: rgba(15, 23, 42, 0.65);
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      transition: background 200ms ease, border-color 200ms ease;
+      padding: 0;
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__thumbs-arrow:hover{
+      background: rgba(255, 255, 255, 1);
+      border-color: rgba(29, 91, 255, 0.30);
+      color: rgba(29, 91, 255, 0.85);
+    }
+    .tpa-lp--{{ sid }} .tpa-lp__thumbs-arrow[disabled]{
+      opacity: 0.3;
+      cursor: default;
+    }
+  }
+
   .tpa-lp--{{ sid }} .tpa-lp__thumbs{
     display: grid;
     grid-auto-flow: column;
@@ -884,9 +975,17 @@
   max-height: 100% !important;
 }
 
+.tpa-lp--{{ sid }} .tpa-lp__thumbs-wrap{
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .tpa-lp--{{ sid }} .tpa-lp__thumbs{
   width: 100%;
   max-width: 100%;
+  min-width: 0;
+  flex: 1 1 auto;
   box-sizing: border-box;
 }
 
@@ -2380,6 +2479,7 @@
     var activeThumb = root.querySelector('[data-tpa-lp-thumb][data-media-id="' + mediaId + '"]');
     if (activeThumb){
       activeThumb.classList.add('is-active');
+      activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     }
 
     stage.classList.add('is-switching');
@@ -2392,6 +2492,8 @@
       if (lightbox && !lightbox.hasAttribute('hidden') && lightboxMedia){
         lightboxMedia.innerHTML = template.innerHTML;
       }
+
+      if (typeof updateThumbArrows === 'function') updateThumbArrows();
     }, 180);
   }
 
@@ -2409,6 +2511,47 @@
         swapMediaById(mediaId);
       });
     });
+  }
+
+  /* ── Stage (main image) prev/next arrows ── */
+  var stagePrev = root.querySelector('[data-tpa-lp-stage-prev]');
+  var stageNext = root.querySelector('[data-tpa-lp-stage-next]');
+
+  if (stagePrev){
+    stagePrev.addEventListener('click', function(e){
+      e.stopPropagation();
+      swapToIndex(getActiveIndex() - 1);
+    });
+  }
+  if (stageNext){
+    stageNext.addEventListener('click', function(e){
+      e.stopPropagation();
+      swapToIndex(getActiveIndex() + 1);
+    });
+  }
+
+  /* ── Thumbnail scroll arrows ── */
+  var thumbsScroll = root.querySelector('[data-tpa-lp-thumbs-scroll]');
+  var thumbsPrev = root.querySelector('[data-tpa-lp-thumbs-prev]');
+  var thumbsNext = root.querySelector('[data-tpa-lp-thumbs-next]');
+
+  function updateThumbArrows(){
+    if (!thumbsScroll || !thumbsPrev || !thumbsNext) return;
+    var sl = thumbsScroll.scrollLeft;
+    var maxScroll = thumbsScroll.scrollWidth - thumbsScroll.clientWidth;
+    thumbsPrev.disabled = sl <= 2;
+    thumbsNext.disabled = sl >= maxScroll - 2;
+  }
+
+  if (thumbsScroll && thumbsPrev && thumbsNext){
+    thumbsPrev.addEventListener('click', function(){
+      thumbsScroll.scrollBy({ left: -200, behavior: 'smooth' });
+    });
+    thumbsNext.addEventListener('click', function(){
+      thumbsScroll.scrollBy({ left: 200, behavior: 'smooth' });
+    });
+    thumbsScroll.addEventListener('scroll', updateThumbArrows);
+    updateThumbArrows();
   }
 
   function openLightbox(){
@@ -2448,6 +2591,14 @@
       if (e.key === 'Enter' || e.key === ' '){
         e.preventDefault();
         openLightbox();
+      }
+      if (e.key === 'ArrowLeft' && thumbs.length > 1){
+        e.preventDefault();
+        swapToIndex(getActiveIndex() - 1);
+      }
+      if (e.key === 'ArrowRight' && thumbs.length > 1){
+        e.preventDefault();
+        swapToIndex(getActiveIndex() + 1);
       }
     });
 
