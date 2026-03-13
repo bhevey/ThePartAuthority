@@ -1739,7 +1739,7 @@
   .tpa-lp--{{ sid }} .tpa-lp__details-grid{
     margin-top: 24px;
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 18px;
   }
   .tpa-lp--{{ sid }} .tpa-lp__details-grid--single{
@@ -2142,27 +2142,6 @@
     .tpa-lp--{{ sid }} .tpa-lp__description-card,
     .tpa-lp--{{ sid }} .tpa-lp__final-cta{
       padding: 20px;
-    }
-  }
-
-  @media (max-width: 767px){
-    .tpa-lp--{{ sid }} .tpa-lp__inner{
-      padding: 0 16px;
-    }
-    .tpa-lp--{{ sid }} .tpa-lp__hero{
-      padding-top: 20px;
-    }
-    .tpa-lp--{{ sid }} .tpa-lp__desc{
-      padding: 18px;
-    }
-    .tpa-lp--{{ sid }} .tpa-lp__section-title{
-      font-size: clamp(20px, 5.5vw, 28px);
-    }
-    .tpa-lp--{{ sid }} .tpa-lp__detail-card{
-      padding: 16px;
-    }
-    .tpa-lp--{{ sid }} .tpa-lp__guarantee{
-      padding: 18px 16px;
     }
   }
 
@@ -2692,9 +2671,10 @@
     { "type": "checkbox", "id": "stock_urgency_enable", "label": "Show stock urgency", "default": true },
     { "type": "text", "id": "stock_text", "label": "Stock urgency text", "default": "Only 8 left in stock — order soon" },
 
-    { "type": "header", "content": "Cart" },
+    { "type": "header", "content": "Cart and shipping" },
     { "type": "text", "id": "atc_label", "label": "Add to cart label", "default": "Add to Cart — Ships Fast" },
     { "type": "text", "id": "sold_out_label", "label": "Sold out label", "default": "Sold Out" },
+    { "type": "range", "id": "free_ship_threshold", "label": "Free shipping threshold ($)", "min": 25, "max": 200, "step": 5, "default": 75 },
 
     { "type": "header", "content": "Trust strip" },
     { "type": "text", "id": "trust_part_1", "label": "Parts trust 1", "default": "Perfect Fit Guarantee" },
@@ -2705,6 +2685,16 @@
     { "type": "text", "id": "trust_app_2", "label": "Appliances trust 2", "default": "Fast AU Shipping" },
     { "type": "text", "id": "trust_app_3", "label": "Appliances trust 3", "default": "30-Day Returns" },
     { "type": "text", "id": "trust_app_4", "label": "Appliances trust 4", "default": "Australian Support" },
+
+    { "type": "header", "content": "Parts compatibility module" },
+    { "type": "text", "id": "fit_title", "label": "Fit title", "default": "Check Fit For Your Model" },
+    { "type": "text", "id": "fit_placeholder", "label": "Fit placeholder", "default": "Enter your model number" },
+    { "type": "text", "id": "fit_btn", "label": "Fit button", "default": "Check Fit" },
+    { "type": "text", "id": "fit_state_default", "label": "Fit default state", "default": "Enter model to verify" },
+    { "type": "text", "id": "fit_state_good", "label": "Fit verified state", "default": "Verified Compatible ✓" },
+    { "type": "text", "id": "fit_state_warn", "label": "Fit warn state", "default": "Enter model to verify" },
+    { "type": "text", "id": "fit_state_bad", "label": "Fit contact state", "default": "Contact Support to Confirm" },
+    { "type": "text", "id": "fit_note", "label": "Fit note fallback", "default": "Our team confirms compatibility before dispatch if required. Zero risk." },
 
     { "type": "header", "content": "Appliance specs" },
     { "type": "text", "id": "specs_title", "label": "Specs title", "default": "Key Specifications" },
@@ -2738,9 +2728,6 @@
     { "type": "text", "id": "guarantee_4_title", "label": "Guarantee 4 title", "default": "Australian Support" },
     { "type": "text", "id": "guarantee_4_desc", "label": "Guarantee 4 desc", "default": "Real people, real help. Our Australian team is here before and after your purchase." },
 
-    { "type": "header", "content": "Product description" },
-    { "type": "text", "id": "desc_title", "label": "Description section title", "default": "Product Description" },
-
     { "type": "header", "content": "Benefits" },
     { "type": "text", "id": "benefits_title", "label": "Benefits title", "default": "Why This Part" },
     { "type": "text", "id": "benefit_part_1", "label": "Part benefit 1", "default": "Restores full performance to your appliance" },
@@ -2753,6 +2740,9 @@
     { "type": "text", "id": "benefit_app_3", "label": "App benefit 3", "default": "Energy efficient operation" },
     { "type": "text", "id": "benefit_app_4", "label": "App benefit 4", "default": "Full warranty coverage included" },
     { "type": "text", "id": "benefit_app_5", "label": "App benefit 5", "default": "Australian support when you need it" },
+
+    { "type": "text", "id": "included_title", "label": "What's included title", "default": "What's in the Box" },
+    { "type": "richtext", "id": "included_fallback", "label": "Included fallback", "default": "<p>Set the \"What's included\" metafield on this product for exact box contents.</p>" },
 
     { "type": "header", "content": "Risk reversal" },
     { "type": "text", "id": "risk_part", "label": "Parts risk statement", "default": "We only sell parts verified for compatibility. If it's not right, we fix it — that's our guarantee." },
