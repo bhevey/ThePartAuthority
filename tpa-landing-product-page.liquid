@@ -1,28 +1,19 @@
-{% comment %}
+{% comment %} 
   Section: TPA Landing Product Page
   Purpose: High-conversion product page designed for cold traffic from Google Ads.
   Optimized for trust, urgency, and premium authority.
   Uses TPA design system: dark navy gradients, #1D5BFF accent, 950 weights, 18px radii.
 
-  Structure (conversion-optimized flow):
-  1. Urgency announcement bar
-  2. Product hero (media + info + trust strip) — mobile stacked
-  3. Social proof counter bar
-  4. Product Description
-  5. Risk reversal guarantee strip
-  6. Benefits grid
-  7. Inline reviews
-  8. FAQ (objection handling)
-  9. Final CTA banner
-  10. Persistent sticky mobile CTA
-
-  Required metafields (same as main PDP):
-  - product.metafields.tpa.subheadline (single_line_text_field)
-  - product.metafields.tpa.product_description (rich_text)
-  - product.metafields.tpa.specs (rich_text)
-  - product.metafields.tpa.warranty (single_line_text_field or rich_text)
-  - product.metafields.tpa.shipping_notes (single_line_text_field or rich_text)
-  - product.metafields.tpa.install_notes (single_line_text_field or rich_text)
+  Updated changes:
+  - Removed parts compatibility checker
+  - Removed free shipping threshold tracker
+  - Removed what's in the box section
+  - Added clear product description section
+  - Moved product description above guarantee section
+  - Restored native Shopify add-to-cart behaviour
+  - Added variant ID syncing for multi-variant products
+  - Improved desktop and mobile responsiveness
+  - Optimized for mobile-first UX
 {% endcomment %}
 
 {% assign sid = section.id %}
@@ -54,60 +45,91 @@
 {%- comment -%} ══════════════════════════════════════════
   2. MAIN PRODUCT SECTION
 {%- endcomment -%}
-<section class="tpa-lp tpa-lp--{{ sid }} color-{{ section.settings.color_scheme }}">
+<section id="tpa-lp-top-{{ sid }}" class="tpa-lp tpa-lp--{{ sid }} color-{{ section.settings.color_scheme }}">
   <div class="tpa-lp__inner">
 
     {%- comment -%} ── PRODUCT HERO GRID ── {%- endcomment -%}
     <div class="tpa-lp__hero">
 
       {%- comment -%} LEFT: MEDIA GALLERY {%- endcomment -%}
-      <div class="tpa-lp__media">
-        <div class="tpa-lp__gallery" data-tpa-lp-gallery>
-          {% assign featured = product.featured_media %}
-          {% if featured %}
-            <div class="tpa-lp__stage" data-tpa-lp-stage data-tpa-lp-zoom>
+      <div class="tpa-lp__gallery" data-tpa-lp-gallery>
+        {% assign featured = product.featured_media %}
+        {% if featured %}
+          <div
+            class="tpa-lp__stage"
+            data-tpa-lp-stage
+            data-tpa-lp-zoom
+            data-active-media-id="{{ featured.id }}"
+            tabindex="0"
+            role="button"
+            aria-label="Open product media in full screen"
+          >
+            <div class="tpa-lp__stage-media" data-tpa-lp-stage-media>
               {% render 'tpa-pdp-media', media: featured, index: 0 %}
+            </div>
 
-              {% if section.settings.media_badge_enable %}
-                <div class="tpa-lp__media-badge">
-                  <span class="tpa-lp__media-badge-dot" aria-hidden="true"></span>
-                  <span>{{ section.settings.media_badge_text }}</span>
-                </div>
+            {% if section.settings.media_badge_enable %}
+              <div class="tpa-lp__media-badge">
+                <span class="tpa-lp__media-badge-dot" aria-hidden="true"></span>
+                <span>{{ section.settings.media_badge_text }}</span>
+              </div>
+            {% endif %}
+
+            {% if compare > price %}
+              <div class="tpa-lp__sale-flag" aria-label="On sale">
+                <span>SAVE {{ compare | minus: price | money }}</span>
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="tpa-lp__media-templates" hidden>
+            {% for media in product.media %}
+              <template data-tpa-lp-template="{{ media.id }}">
+                {% render 'tpa-pdp-media', media: media, index: forloop.index0 %}
+              </template>
+            {% endfor %}
+          </div>
+
+          <div class="tpa-lp__lightbox" data-tpa-lp-lightbox hidden aria-hidden="true">
+            <div class="tpa-lp__lightbox-backdrop" data-tpa-lp-lightbox-close></div>
+
+            <div class="tpa-lp__lightbox-dialog" role="dialog" aria-modal="true" aria-label="Product media viewer">
+              <button class="tpa-lp__lightbox-close" type="button" data-tpa-lp-lightbox-close aria-label="Close full screen media">×</button>
+
+              {% if product.media.size > 1 %}
+                <button class="tpa-lp__lightbox-nav tpa-lp__lightbox-nav--prev" type="button" data-tpa-lp-lightbox-prev aria-label="Previous image">‹</button>
+                <button class="tpa-lp__lightbox-nav tpa-lp__lightbox-nav--next" type="button" data-tpa-lp-lightbox-next aria-label="Next image">›</button>
               {% endif %}
 
-              {% if compare > price %}
-                <div class="tpa-lp__sale-flag" aria-label="On sale">
-                  <span>SAVE {{ compare | minus: price | money }}</span>
-                </div>
-              {% endif %}
+              <div class="tpa-lp__lightbox-media" data-tpa-lp-lightbox-media></div>
             </div>
-          {% endif %}
+          </div>
+        {% endif %}
 
-          {% assign media_count = product.media.size %}
-          {% if media_count > 1 %}
-            <div class="tpa-lp__thumbs" aria-label="Product media">
-              {% for media in product.media %}
-                <button
-                  class="tpa-lp__thumb{% if media.id == featured.id %} is-active{% endif %}"
-                  type="button"
-                  data-tpa-lp-thumb
-                  data-media-id="{{ media.id }}"
-                  aria-label="View media {{ forloop.index }}"
-                >
-                  {% if media.preview_image %}
-                    <img
-                      src="{{ media.preview_image | image_url: width: 220 }}"
-                      alt="{{ media.preview_image.alt | default: product.title | escape }}"
-                      loading="lazy"
-                      width="84"
-                      height="84"
-                    >
-                  {% endif %}
-                </button>
-              {% endfor %}
-            </div>
-          {% endif %}
-        </div>
+        {% assign media_count = product.media.size %}
+        {% if media_count > 1 %}
+          <div class="tpa-lp__thumbs" aria-label="Product media">
+            {% for media in product.media %}
+              <button
+                class="tpa-lp__thumb{% if media.id == featured.id %} is-active{% endif %}"
+                type="button"
+                data-tpa-lp-thumb
+                data-media-id="{{ media.id }}"
+                aria-label="View media {{ forloop.index }}"
+              >
+                {% if media.preview_image %}
+                  <img
+                    src="{{ media.preview_image | image_url: width: 220 }}"
+                    alt="{{ media.preview_image.alt | default: product.title | escape }}"
+                    loading="lazy"
+                    width="84"
+                    height="84"
+                  >
+                {% endif %}
+              </button>
+            {% endfor %}
+          </div>
+        {% endif %}
       </div>
 
       {%- comment -%} RIGHT: PRODUCT INFO + BUY BOX {%- endcomment -%}
@@ -147,6 +169,18 @@
 
         {%- comment -%} Price block {%- endcomment -%}
         <div class="tpa-lp__price-block" data-tpa-lp-price>
+          {% if is_appliance %}
+            <div class="tpa-lp__price-offer">
+              <span class="tpa-lp__price-offer-dot" aria-hidden="true"></span>
+              <span>FREE SHIPPING TO METRO AREAS</span>
+            </div>
+          {% elsif is_part and product.metafields.tpa.free_shipping %}
+            <div class="tpa-lp__price-offer">
+              <span class="tpa-lp__price-offer-dot" aria-hidden="true"></span>
+              <span>FREE SHIPPING</span>
+            </div>
+          {% endif %}
+
           <div class="tpa-lp__price-row">
             <div class="tpa-lp__price">{{ price | money }}</div>
             {% if compare > price %}
@@ -259,10 +293,6 @@
                 <span aria-hidden="true">🛒</span>
                 <span>{% if v.available %}{{ section.settings.atc_label }}{% else %}{{ section.settings.sold_out_label }}{% endif %}</span>
               </span>
-              <span class="tpa-lp__atc-success" aria-hidden="true">
-                <span>✓</span>
-                <span>Added to Cart!</span>
-              </span>
             </button>
           </div>
 
@@ -328,16 +358,21 @@
     {%- comment -%} ══════════════════════════════════════════
       4. PRODUCT DESCRIPTION
     {%- endcomment -%}
-    {% assign product_description = product.metafields.tpa.product_description.value %}
-    {% assign description_content = product_description | default: product.description %}
-    {% if description_content != blank %}
-      <div class="tpa-lp__desc" data-tpa-lp-section>
-        <h2 class="tpa-lp__section-title">{{ section.settings.desc_title }}</h2>
-        <div class="tpa-lp__desc-body tpa-lp__rich">
-          {{ description_content }}
+    <div class="tpa-lp__description-section" data-tpa-lp-section>
+      <div class="tpa-lp__description-card">
+        <div class="tpa-lp__description-header">
+          <span class="tpa-lp__detail-icon" aria-hidden="true">📝</span>
+          <h2 class="tpa-lp__description-title">Product Description</h2>
+        </div>
+        <div class="tpa-lp__description-body rte">
+          {% if product.description != blank %}
+            {{ product.description }}
+          {% else %}
+            <p>Product description coming soon.</p>
+          {% endif %}
         </div>
       </div>
-    {% endif %}
+    </div>
 
     {%- comment -%} ══════════════════════════════════════════
       5. RISK REVERSAL GUARANTEE STRIP
@@ -372,9 +407,9 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      6. BENEFITS GRID
+      6. BENEFITS
     {%- endcomment -%}
-    <div class="tpa-lp__details-grid" data-tpa-lp-section>
+    <div class="tpa-lp__details-grid tpa-lp__details-grid--single" data-tpa-lp-section>
       <div class="tpa-lp__detail-card">
         <div class="tpa-lp__detail-header">
           <span class="tpa-lp__detail-icon" aria-hidden="true">⚡</span>
@@ -399,7 +434,7 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      6. RISK STATEMENT (bold, centered)
+      7. RISK STATEMENT
     {%- endcomment -%}
     <div class="tpa-lp__risk-banner" data-tpa-lp-section>
       <div class="tpa-lp__risk-icon" aria-hidden="true">🛡️</div>
@@ -413,7 +448,7 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      7. INLINE REVIEWS
+      8. INLINE REVIEWS
     {%- endcomment -%}
     <div class="tpa-lp__reviews" id="tpa-lp-reviews-{{ sid }}" data-tpa-lp-section>
       <div class="tpa-lp__reviews-header">
@@ -469,7 +504,7 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      8. FAQ (objection handling)
+      9. FAQ
     {%- endcomment -%}
     <div class="tpa-lp__faq" data-tpa-lp-section>
       <h2 class="tpa-lp__section-title">{{ section.settings.faq_title }}</h2>
@@ -523,7 +558,7 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      9. FINAL CTA BANNER
+      10. FINAL CTA BANNER
     {%- endcomment -%}
     <div class="tpa-lp__final-cta" data-tpa-lp-section>
       <div class="tpa-lp__final-orb" aria-hidden="true"></div>
@@ -544,8 +579,6 @@
 <style>
   /* ═══════════════════════════════════════════════════════════
      TPA LANDING PRODUCT PAGE — COMPLETE STYLES
-     Design tokens: #06122C/#071A3A dark, #1D5BFF accent,
-     18px radii, 950 weights, multi-layer shadows
      ═══════════════════════════════════════════════════════════ */
 
   /* ── 1. ANNOUNCEMENT BAR ── */
@@ -585,9 +618,56 @@
   .tpa-lp--{{ sid }} .tpa-lp__inner{
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 20px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__price-offer{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.14);
+    font-size: 11px;
+    font-weight: 950;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: rgba(22, 163, 74, 0.95);
+    white-space: nowrap;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__stage-media{
+    width: 100%;
+    height: 100%;
   }
 
+  .tpa-lp--{{ sid }} .tpa-lp__price-offer-dot{
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: rgba(22, 163, 74, 0.95);
+    animation: tpaLpMetroPulse{{ sid }} 1.8s ease-in-out infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes tpaLpMetroPulse{{ sid }}{
+    0%, 100%{ box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+    50%{ box-shadow: 0 0 0 7px rgba(22, 163, 74, 0); }
+  }
+
+  @media (max-width: 640px){
+    .tpa-lp--{{ sid }} .tpa-lp__price-offer{
+      font-size: 10px;
+      padding: 5px 9px;
+      margin-bottom: 8px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .tpa-lp--{{ sid }} .tpa-lp__price-offer-dot{
+      animation: none;
+    }
+  }
   /* ── HERO GRID ── */
   .tpa-lp--{{ sid }} .tpa-lp__hero{
     display: grid;
@@ -598,8 +678,15 @@
   }
 
   /* ── GALLERY ── */
+  .tpa-lp--{{ sid }} .tpa-lp__media{
+    min-width: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__buy{
+    min-width: 0;
+  }
   .tpa-lp--{{ sid }} .tpa-lp__stage{
     position: relative;
+    aspect-ratio: 1 / 1;
     border-radius: 18px;
     overflow: hidden;
     border: 1px solid rgba(15, 23, 42, 0.10);
@@ -612,7 +699,8 @@
   .tpa-lp--{{ sid }} .tpa-lp__stage video,
   .tpa-lp--{{ sid }} .tpa-lp__stage iframe{
     width: 100%;
-    height: auto;
+    height: 100%;
+    object-fit: contain;
     display: block;
     transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
   }
@@ -743,7 +831,133 @@
     line-height: 1.55;
     color: rgba(var(--color-foreground), 0.68);
   }
+/* ── MOBILE-FIRST GALLERY FRAME FIX ── */
+.tpa-lp--{{ sid }} .tpa-lp__gallery{
+  width: 100%;
+  min-width: 0;
+}
 
+.tpa-lp--{{ sid }} .tpa-lp__stage{
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 18px;
+  box-sizing: border-box;
+}
+
+.tpa-lp--{{ sid }} .tpa-lp__stage-media{
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tpa-lp--{{ sid }} .tpa-lp__stage-media > *{
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.tpa-lp--{{ sid }} .tpa-lp__stage-media img{
+  width: 100%;
+  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.tpa-lp--{{ sid }} .tpa-lp__stage-media video,
+.tpa-lp--{{ sid }} .tpa-lp__stage-media iframe,
+.tpa-lp--{{ sid }} .tpa-lp__stage-media model-viewer,
+.tpa-lp--{{ sid }} .tpa-lp__stage-media .deferred-media,
+.tpa-lp--{{ sid }} .tpa-lp__stage-media .product-media-container{
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+}
+
+.tpa-lp--{{ sid }} .tpa-lp__thumbs{
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.tpa-lp--{{ sid }} .tpa-lp__thumb{
+  flex: 0 0 auto;
+}
+
+@media (max-width: 640px){
+  .tpa-lp--{{ sid }} .tpa-lp__media{
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__gallery{
+    width: 100%;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__stage{
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 16px;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__stage img,
+  .tpa-lp--{{ sid }} .tpa-lp__stage video,
+  .tpa-lp--{{ sid }} .tpa-lp__stage iframe{
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__media-badge{
+    top: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
+    font-size: 11px;
+    padding: 7px 10px;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__sale-flag{
+    top: 10px;
+    right: 10px;
+    max-width: calc(100% - 20px);
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__thumbs{
+    grid-auto-columns: 64px;
+    gap: 8px;
+    padding-top: 10px;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__thumb{
+    width: 64px;
+    min-width: 64px;
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__thumb img{
+    width: 100%;
+    height: 54px;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+}
   /* Rating */
   .tpa-lp--{{ sid }} .tpa-lp__rating{
     margin-top: 14px;
@@ -780,6 +994,161 @@
   .tpa-lp--{{ sid }} .tpa-lp__rating-link:hover{
     border-bottom-style: solid;
     color: rgba(29, 91, 255, 1);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__stage{
+    cursor: zoom-in;
+    touch-action: pan-y;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__stage-media{
+    width: 100%;
+    height: 100%;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox[hidden]{
+    display: none !important;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox{
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-backdrop{
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-dialog{
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 28px;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-media{
+    max-width: min(1100px, 92vw);
+    max-height: 88vh;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-media img,
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-media video,
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-media iframe{
+    max-width: 100%;
+    max-height: 88vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 16px;
+    display: block;
+    margin: 0 auto;
+    background: transparent;
+  }
+
+  @media (max-width: 640px){
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-media{
+      max-width: 100%;
+      max-height: 82vh;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-media img,
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-media video,
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-media iframe{
+      max-width: 100%;
+      max-height: 82vh;
+      border-radius: 12px;
+    }
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-close{
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 30px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-nav{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 52px;
+    height: 52px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 34px;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-nav--prev{
+    left: 18px;
+  }
+
+  .tpa-lp--{{ sid }} .tpa-lp__lightbox-nav--next{
+    right: 18px;
+  }
+
+  @media (max-width: 640px){
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-dialog{
+      padding: 16px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-close{
+      top: 12px;
+      right: 12px;
+      width: 42px;
+      height: 42px;
+      font-size: 28px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-nav{
+      width: 44px;
+      height: 44px;
+      font-size: 28px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-nav--prev{
+      left: 10px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__lightbox-nav--next{
+      right: 10px;
+    }
   }
 
   /* Price */
@@ -896,6 +1265,39 @@
     background: rgba(29, 91, 255, 0.04);
   }
 
+  /* ── MODULE ── */
+  .tpa-lp--{{ sid }} .tpa-lp__module{
+    margin-top: 18px;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.88);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+    padding: 18px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__module-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__module-icon{
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(29, 91, 255, 0.06);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__module-title{
+    font-weight: 950;
+    font-size: 14px;
+    color: rgb(var(--color-foreground));
+  }
+
   /* Specs grid */
   .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
     display: grid;
@@ -996,7 +1398,7 @@
     position: relative;
     overflow: hidden;
     box-shadow: 0 18px 44px rgba(29, 91, 255, 0.22);
-    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+    transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, opacity 180ms ease;
   }
   .tpa-lp--{{ sid }} .tpa-lp__atc:hover{
     transform: translateY(-2px);
@@ -1009,6 +1411,10 @@
     opacity: 0.50;
     cursor: default;
     box-shadow: none;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__atc.is-loading{
+    opacity: 0.8;
+    pointer-events: none;
   }
 
   /* ATC shimmer */
@@ -1026,25 +1432,6 @@
     0%{ left: -100%; }
     45%{ left: 150%; }
     100%{ left: 150%; }
-  }
-
-  /* ATC success state */
-  .tpa-lp--{{ sid }} .tpa-lp__atc-default{ display: inline-flex; align-items: center; gap: 8px; }
-  .tpa-lp--{{ sid }} .tpa-lp__atc-success{ display: none; align-items: center; gap: 8px; }
-  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success{
-    background: rgba(22, 163, 74, 0.95);
-    box-shadow: 0 18px 44px rgba(22, 163, 74, 0.22);
-    pointer-events: none;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success .tpa-lp__atc-default{ display: none; }
-  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success .tpa-lp__atc-success{
-    display: inline-flex;
-    animation: tpaLpAtcPop{{ sid }} 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__atc.is-success .tpa-lp__atc-shimmer{ animation: none; }
-  @keyframes tpaLpAtcPop{{ sid }}{
-    0%{ transform: scale(0.8); opacity: 0; }
-    100%{ transform: scale(1); opacity: 1; }
   }
 
   /* Trust strip */
@@ -1139,7 +1526,7 @@
     align-items: center;
     gap: 8px;
     box-shadow: 0 8px 20px rgba(29, 91, 255, 0.22);
-    transition: transform 180ms ease, box-shadow 180ms ease;
+    transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
   }
   .tpa-lp--{{ sid }} .tpa-lp__sticky-atc:hover{
     transform: translateY(-1px);
@@ -1148,6 +1535,10 @@
   .tpa-lp--{{ sid }} .tpa-lp__sticky-atc:disabled{
     opacity: 0.50;
     cursor: default;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__sticky-atc.is-loading{
+    opacity: 0.8;
+    pointer-events: none;
   }
 
   /* ── 3. SOCIAL PROOF BAR ── */
@@ -1190,7 +1581,80 @@
     background: rgba(255,255,255,0.12);
   }
 
-  /* ── 4. GUARANTEES ── */
+  /* ── 4. PRODUCT DESCRIPTION ── */
+  .tpa-lp--{{ sid }} .tpa-lp__description-section{
+    margin-top: 24px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-card{
+    border-radius: 18px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.92);
+    box-shadow:
+      0 18px 50px rgba(2, 6, 23, 0.08),
+      0 4px 14px rgba(2, 6, 23, 0.05);
+    padding: 24px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-header{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-title{
+    margin: 0;
+    font-weight: 950;
+    letter-spacing: -0.02em;
+    font-size: clamp(20px, 2.5vw, 30px);
+    line-height: 1.15;
+    color: rgb(var(--color-foreground));
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body{
+    font-size: 14px;
+    line-height: 1.75;
+    color: rgba(var(--color-foreground), 0.78);
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body > *:first-child{
+    margin-top: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body > *:last-child{
+    margin-bottom: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body h1,
+  .tpa-lp--{{ sid }} .tpa-lp__description-body h2,
+  .tpa-lp--{{ sid }} .tpa-lp__description-body h3,
+  .tpa-lp--{{ sid }} .tpa-lp__description-body h4{
+    color: rgb(var(--color-foreground));
+    line-height: 1.2;
+    margin-top: 1.2em;
+    margin-bottom: 0.6em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body p,
+  .tpa-lp--{{ sid }} .tpa-lp__description-body ul,
+  .tpa-lp--{{ sid }} .tpa-lp__description-body ol{
+    margin-top: 0;
+    margin-bottom: 1em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body img{
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body table{
+    width: 100%;
+    display: block;
+    overflow-x: auto;
+    border-collapse: collapse;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__description-body th,
+  .tpa-lp--{{ sid }} .tpa-lp__description-body td{
+    padding: 10px 12px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    text-align: left;
+  }
+
+  /* ── 5. GUARANTEES ── */
   .tpa-lp--{{ sid }} .tpa-lp__guarantees{
     margin-top: 32px;
     padding: 28px;
@@ -1271,35 +1735,15 @@
     color: rgba(var(--color-foreground), 0.62);
   }
 
-  /* ── 4. PRODUCT DESCRIPTION ── */
-  .tpa-lp--{{ sid }} .tpa-lp__desc{
-    margin-top: 24px;
-    padding: 24px 28px;
-    border-radius: 18px;
-    border: 1px solid rgba(15, 23, 42, 0.10);
-    background: rgba(255,255,255,0.88);
-    box-shadow:
-      0 18px 50px rgba(2, 6, 23, 0.08),
-      0 4px 14px rgba(2, 6, 23, 0.05);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__desc .tpa-lp__section-title{
-    margin: 0 0 14px;
-    font-size: clamp(18px, 2.2vw, 22px);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__desc-body{
-    font-size: 15px;
-    line-height: 1.75;
-    color: rgba(var(--color-foreground), 0.80);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__desc-body p{ margin: 0 0 12px; }
-  .tpa-lp--{{ sid }} .tpa-lp__desc-body p:last-child{ margin-bottom: 0; }
-
-  /* ── 6. BENEFITS GRID ── */
+  /* ── 6. DETAILS GRID ── */
   .tpa-lp--{{ sid }} .tpa-lp__details-grid{
     margin-top: 24px;
     display: grid;
     grid-template-columns: 1fr;
     gap: 18px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__details-grid--single{
+    grid-template-columns: 1fr;
   }
   .tpa-lp--{{ sid }} .tpa-lp__detail-card{
     border-radius: 18px;
@@ -1355,13 +1799,8 @@
     flex-shrink: 0;
     margin-top: 1px;
   }
-  .tpa-lp--{{ sid }} .tpa-lp__rich{
-    font-size: 13px;
-    line-height: 1.65;
-    color: rgba(var(--color-foreground), 0.74);
-  }
 
-  /* ── 6. RISK BANNER ── */
+  /* ── 7. RISK BANNER ── */
   .tpa-lp--{{ sid }} .tpa-lp__risk-banner{
     margin-top: 24px;
     padding: 24px;
@@ -1384,7 +1823,7 @@
     color: rgba(255,255,255,0.92);
   }
 
-  /* ── 7. REVIEWS ── */
+  /* ── 8. REVIEWS ── */
   .tpa-lp--{{ sid }} .tpa-lp__reviews{
     margin-top: 32px;
   }
@@ -1498,7 +1937,7 @@
     color: rgba(var(--color-foreground), 0.50);
   }
 
-  /* ── 8. FAQ ── */
+  /* ── 9. FAQ ── */
   .tpa-lp--{{ sid }} .tpa-lp__faq{
     margin-top: 32px;
     border-radius: 18px;
@@ -1567,7 +2006,7 @@
     to{ opacity: 1; transform: translateY(0); }
   }
 
-  /* ── 9. FINAL CTA ── */
+  /* ── 10. FINAL CTA ── */
   .tpa-lp--{{ sid }} .tpa-lp__final-cta{
     margin-top: 32px;
     padding: 36px 28px;
@@ -1649,28 +2088,60 @@
 
   /* ══════════ RESPONSIVE ══════════ */
   @media (max-width: 980px){
+    .tpa-lp--{{ sid }}{
+      padding: 0 0 88px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__inner{
+      padding: 0 18px;
+    }
+
     .tpa-lp--{{ sid }} .tpa-lp__hero{
       grid-template-columns: 1fr;
       gap: 22px;
+      padding-top: 22px;
     }
+
     .tpa-lp--{{ sid }} .tpa-lp__proof-bar{
       grid-template-columns: 1fr 1fr;
       gap: 14px;
     }
+
     .tpa-lp--{{ sid }} .tpa-lp__proof-divider{
       display: none;
     }
+
     .tpa-lp--{{ sid }} .tpa-lp__guarantees-grid{
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .tpa-lp--{{ sid }} .tpa-lp__details-grid{
+      grid-template-columns: 1fr;
+    }
+
     .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
       grid-template-columns: 1fr 1fr;
     }
+
     .tpa-lp--{{ sid }} .tpa-lp__buy-row{
       grid-template-columns: 1fr;
+      gap: 10px;
     }
+
+    .tpa-lp--{{ sid }} .tpa-lp__qty{
+      width: 100%;
+    }
+
     .tpa-lp--{{ sid }} .tpa-lp__trust-strip{
       grid-template-columns: 1fr;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__guarantees,
+    .tpa-lp--{{ sid }} .tpa-lp__faq,
+    .tpa-lp--{{ sid }} .tpa-lp__detail-card,
+    .tpa-lp--{{ sid }} .tpa-lp__description-card,
+    .tpa-lp--{{ sid }} .tpa-lp__final-cta{
+      padding: 20px;
     }
   }
 
@@ -1696,18 +2167,77 @@
   }
 
   @media (max-width: 640px){
+    .tpa-lp--{{ sid }} .tpa-lp__inner{
+      padding: 0 14px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__title{
+      font-size: 30px;
+      line-height: 1.1;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__subheadline{
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__price{
+      font-size: 28px;
+    }
+
     .tpa-lp--{{ sid }} .tpa-lp__proof-bar{
       grid-template-columns: 1fr 1fr;
-      padding: 18px 16px;
+      padding: 18px 14px;
     }
+
     .tpa-lp--{{ sid }} .tpa-lp__guarantees-grid{
       grid-template-columns: 1fr;
     }
+
     .tpa-lp--{{ sid }} .tpa-lp__reviews-grid{
       grid-template-columns: 1fr;
     }
+
     .tpa-lp--{{ sid }} .tpa-lp__specs-grid{
       grid-template-columns: 1fr;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__thumbs{
+      grid-auto-columns: 72px;
+      gap: 8px;
+      padding-top: 10px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__thumb img{
+      height: 60px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__sticky{
+      padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+      gap: 10px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__sticky-left{
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__sticky-title{
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__sticky-atc{
+      height: 42px;
+      padding: 0 16px;
+      font-size: 12px;
+    }
+
+    .tpa-lp--{{ sid }} .tpa-lp__description-body{
+      font-size: 14px;
+      line-height: 1.7;
     }
   }
 
@@ -1757,30 +2287,68 @@
     });
   }
 
-  /* ── ATC with AJAX + success animation ── */
   var atcBtn = root.querySelector('[data-tpa-lp-atc]');
+  var stickyAtcBtn = root.querySelector('.tpa-lp__sticky-atc');
   var form = root.querySelector('[data-tpa-lp-form]');
-  if (atcBtn && form){
-    form.addEventListener('submit', function(e){
-      e.preventDefault();
-      if (atcBtn.disabled || atcBtn.classList.contains('is-success')) return;
-      atcBtn.classList.add('is-success');
+  var variantInput = root.querySelector('[data-tpa-lp-variant-id]');
+  var optionInputs = root.querySelectorAll('.tpa-lp__variants input[type="radio"]');
+  var variants = {{ product.variants | json }};
 
-      var formData = new FormData(form);
-      fetch('{{ routes.cart_add_url }}.js', {
-        method: 'POST',
-        body: formData,
-        credentials: 'same-origin'
-      }).then(function(r){ return r.json(); })
-      .then(function(){
-        setTimeout(function(){
-          atcBtn.classList.remove('is-success');
-        }, 2200);
-      })
-      .catch(function(){
-        atcBtn.classList.remove('is-success');
-        form.submit();
-      });
+  /* ── Update hidden variant ID when options change ── */
+  function updateVariantId(){
+    if (!variantInput || !variants || !variants.length) return;
+
+    var selectedOptions = [];
+    var groups = root.querySelectorAll('.tpa-lp__opt');
+
+    groups.forEach(function(group){
+      var checked = group.querySelector('input[type="radio"]:checked');
+      if (checked) selectedOptions.push(checked.value);
+    });
+
+    var matched = variants.find(function(variant){
+      return JSON.stringify(variant.options) === JSON.stringify(selectedOptions);
+    });
+
+    if (matched){
+      variantInput.value = matched.id;
+
+      if (atcBtn){
+        atcBtn.disabled = !matched.available;
+        atcBtn.querySelector('.tpa-lp__atc-default span:last-child').textContent = matched.available
+          ? {{ section.settings.atc_label | json }}
+          : {{ section.settings.sold_out_label | json }};
+      }
+
+      if (stickyAtcBtn){
+        stickyAtcBtn.disabled = !matched.available;
+      }
+    }
+  }
+
+  if (optionInputs.length){
+    optionInputs.forEach(function(input){
+      input.addEventListener('change', updateVariantId);
+    });
+    updateVariantId();
+  }
+
+  /* ── Native Shopify add to cart ── */
+  if (atcBtn && form){
+    form.addEventListener('submit', function(){
+      if (!atcBtn.disabled){
+        atcBtn.classList.add('is-loading');
+      }
+      if (stickyAtcBtn && !stickyAtcBtn.disabled){
+        stickyAtcBtn.classList.add('is-loading');
+      }
+
+      setTimeout(function(){
+        atcBtn.classList.remove('is-loading');
+        if (stickyAtcBtn){
+          stickyAtcBtn.classList.remove('is-loading');
+        }
+      }, 2000);
     });
   }
 
@@ -1799,20 +2367,208 @@
     stickyObs.observe(atcBtn);
   }
 
-  /* ── Gallery thumbnail switching ── */
+    /* ── Gallery thumbnail switching + swipe + fullscreen ── */
   var stage = root.querySelector('[data-tpa-lp-stage]');
-  var thumbs = root.querySelectorAll('[data-tpa-lp-thumb]');
-  if (stage && thumbs.length > 1){
+  var stageMedia = root.querySelector('[data-tpa-lp-stage-media]');
+  var thumbs = Array.prototype.slice.call(root.querySelectorAll('[data-tpa-lp-thumb]'));
+  var lightbox = root.querySelector('[data-tpa-lp-lightbox]');
+  var lightboxMedia = root.querySelector('[data-tpa-lp-lightbox-media]');
+  var lightboxPrev = root.querySelector('[data-tpa-lp-lightbox-prev]');
+  var lightboxNext = root.querySelector('[data-tpa-lp-lightbox-next]');
+  var lightboxCloseBtns = root.querySelectorAll('[data-tpa-lp-lightbox-close]');
+  var mediaIds = thumbs.map(function(thumb){
+    return thumb.getAttribute('data-media-id');
+  });
+
+  function getActiveMediaId(){
+    return stage ? stage.getAttribute('data-active-media-id') : null;
+  }
+
+  function getActiveIndex(){
+    var activeId = getActiveMediaId();
+    return mediaIds.indexOf(activeId);
+  }
+
+  function swapMediaById(mediaId){
+    var template = root.querySelector('[data-tpa-lp-template="' + mediaId + '"]');
+    if (!template || !stage || !stageMedia) return;
+    if (stage.getAttribute('data-active-media-id') === mediaId) return;
+
+    thumbs.forEach(function(t){
+      t.classList.remove('is-active');
+    });
+
+    var activeThumb = root.querySelector('[data-tpa-lp-thumb][data-media-id="' + mediaId + '"]');
+    if (activeThumb){
+      activeThumb.classList.add('is-active');
+    }
+
+    stage.classList.add('is-switching');
+
+    setTimeout(function(){
+      stageMedia.innerHTML = template.innerHTML;
+      stage.setAttribute('data-active-media-id', mediaId);
+      stage.classList.remove('is-switching');
+
+      if (lightbox && !lightbox.hasAttribute('hidden') && lightboxMedia){
+        lightboxMedia.innerHTML = template.innerHTML;
+      }
+    }, 180);
+  }
+
+  function swapToIndex(index){
+    if (!mediaIds.length) return;
+    if (index < 0) index = mediaIds.length - 1;
+    if (index >= mediaIds.length) index = 0;
+    swapMediaById(mediaIds[index]);
+  }
+
+  if (stage && stageMedia && thumbs.length > 1){
     thumbs.forEach(function(thumb){
       thumb.addEventListener('click', function(){
-        thumbs.forEach(function(t){ t.classList.remove('is-active'); });
-        thumb.classList.add('is-active');
-        stage.classList.add('is-switching');
-        setTimeout(function(){
-          stage.classList.remove('is-switching');
-        }, 300);
+        var mediaId = thumb.getAttribute('data-media-id');
+        swapMediaById(mediaId);
       });
     });
+  }
+
+  function openLightbox(){
+    if (!lightbox || !lightboxMedia || !stageMedia) return;
+    lightboxMedia.innerHTML = stageMedia.innerHTML;
+    lightbox.removeAttribute('hidden');
+    lightbox.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox(){
+    if (!lightbox) return;
+    lightbox.setAttribute('hidden', '');
+    lightbox.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    document.body.style.overflow = '';
+  }
+
+  if (stage){
+    var touchStartX = 0;
+    var touchStartY = 0;
+    var touchEndX = 0;
+    var touchMoved = false;
+
+    var suppressStageClick = false;
+
+    stage.addEventListener('click', function(){
+      if (suppressStageClick) {
+        suppressStageClick = false;
+        return;
+      }
+      openLightbox();
+    });
+
+    stage.addEventListener('keydown', function(e){
+      if (e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        openLightbox();
+      }
+    });
+
+    stage.addEventListener('touchstart', function(e){
+      if (!e.touches || !e.touches.length) return;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+      touchEndX = touchStartX;
+      touchMoved = false;
+    }, { passive: true });
+
+    stage.addEventListener('touchmove', function(e){
+      if (!e.touches || !e.touches.length) return;
+      touchEndX = e.touches[0].clientX;
+      var currentY = e.touches[0].clientY;
+      if (Math.abs(touchEndX - touchStartX) > 10 || Math.abs(currentY - touchStartY) > 10){
+        touchMoved = true;
+      }
+    }, { passive: true });
+
+    stage.addEventListener('touchend', function(){
+      var dx = touchEndX - touchStartX;
+      var absDx = Math.abs(dx);
+
+      if (absDx > 40 && thumbs.length > 1){
+        suppressStageClick = true;
+        var currentIndex = getActiveIndex();
+        if (dx < 0){
+          swapToIndex(currentIndex + 1);
+        } else {
+          swapToIndex(currentIndex - 1);
+        }
+        return;
+      }
+
+      if (!touchMoved){
+        openLightbox();
+      }
+    }, { passive: true });
+  }
+
+  if (lightboxPrev){
+    lightboxPrev.addEventListener('click', function(){
+      swapToIndex(getActiveIndex() - 1);
+    });
+  }
+
+  if (lightboxNext){
+    lightboxNext.addEventListener('click', function(){
+      swapToIndex(getActiveIndex() + 1);
+    });
+  }
+
+  if (lightboxCloseBtns.length){
+    lightboxCloseBtns.forEach(function(btn){
+      btn.addEventListener('click', closeLightbox);
+    });
+  }
+
+  document.addEventListener('keydown', function(e){
+    if (!lightbox || lightbox.hasAttribute('hidden')) return;
+
+    if (e.key === 'Escape'){
+      closeLightbox();
+    }
+
+    if (e.key === 'ArrowLeft' && thumbs.length > 1){
+      swapToIndex(getActiveIndex() - 1);
+    }
+
+    if (e.key === 'ArrowRight' && thumbs.length > 1){
+      swapToIndex(getActiveIndex() + 1);
+    }
+  });
+
+  if (lightbox){
+    var lbTouchStartX = 0;
+    var lbTouchEndX = 0;
+
+    lightbox.addEventListener('touchstart', function(e){
+      if (!e.touches || !e.touches.length) return;
+      lbTouchStartX = e.touches[0].clientX;
+      lbTouchEndX = lbTouchStartX;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchmove', function(e){
+      if (!e.touches || !e.touches.length) return;
+      lbTouchEndX = e.touches[0].clientX;
+    }, { passive: true });
+
+    lightbox.addEventListener('touchend', function(){
+      var dx = lbTouchEndX - lbTouchStartX;
+      if (Math.abs(dx) > 40 && thumbs.length > 1){
+        if (dx < 0){
+          swapToIndex(getActiveIndex() + 1);
+        } else {
+          swapToIndex(getActiveIndex() - 1);
+        }
+      }
+    }, { passive: true });
   }
 
   /* ── Scroll-triggered reveals (guarantees + reviews) ── */
@@ -1954,7 +2710,7 @@
     { "type": "text", "id": "specs_title", "label": "Specs title", "default": "Key Specifications" },
     { "type": "text", "id": "specs_warranty_label", "label": "Warranty label", "default": "Warranty" },
     { "type": "text", "id": "specs_warranty_fallback", "label": "Warranty fallback", "default": "Included with purchase" },
-    { "type": "text", "id": "specs_shipping_label", "label": "Shipping label", "default": "Shipping" },
+    { "type": "text", "id": "specs_shipping_label", "label": "Shipping label", "default": "Fast AU shipping with tracking" },
     { "type": "text", "id": "specs_shipping_fallback", "label": "Shipping fallback", "default": "Fast AU shipping with tracking" },
     { "type": "text", "id": "specs_setup_label", "label": "Setup label", "default": "Setup" },
     { "type": "text", "id": "specs_setup_fallback", "label": "Setup fallback", "default": "Quick start guide included" },
@@ -2012,13 +2768,13 @@
     { "type": "text", "id": "faq_subtitle", "label": "FAQ subtitle", "default": "Everything you need to know before ordering." },
 
     { "type": "text", "id": "faq_part_q1", "label": "Parts Q1", "default": "How do I know this part fits my appliance?" },
-    { "type": "text", "id": "faq_part_a1", "label": "Parts A1", "default": "Contact our support team to confirm compatibility. We verify before dispatch so you always receive the right part — that's our Perfect Fit Guarantee." },
+    { "type": "text", "id": "faq_part_a1", "label": "Parts A1", "default": "We list product details clearly on each page. If you still need help, contact our support team before ordering and we’ll help you confirm the right part." },
     { "type": "text", "id": "faq_part_q2", "label": "Parts Q2", "default": "How long does shipping take?" },
     { "type": "text", "id": "faq_part_a2", "label": "Parts A2", "default": "We dispatch fast from Australia. Most metro orders arrive in 2-5 business days. Tracking is provided with every order." },
     { "type": "text", "id": "faq_part_q3", "label": "Parts Q3", "default": "Is installation difficult?" },
     { "type": "text", "id": "faq_part_a3", "label": "Parts A3", "default": "Most parts install in under 5 minutes with no tools required. If you need help, our support team can guide you through the process." },
     { "type": "text", "id": "faq_part_q4", "label": "Parts Q4", "default": "What if the part doesn't fit?" },
-    { "type": "text", "id": "faq_part_a4", "label": "Parts A4", "default": "Our Perfect Fit Guarantee has you covered. If the part doesn't fit, we'll send the correct one or provide a full refund — no questions asked." },
+    { "type": "text", "id": "faq_part_a4", "label": "Parts A4", "default": "If the part is not right, contact our team and we’ll help resolve it quickly." },
     { "type": "text", "id": "faq_part_q5", "label": "Parts Q5", "default": "Can I return it if I change my mind?" },
     { "type": "text", "id": "faq_part_a5", "label": "Parts A5", "default": "Absolutely. We offer 30-day returns on all products. Contact our Australian support team and we'll sort it quickly." },
 
@@ -2095,7 +2851,7 @@
           "settings": {
             "stars": 5,
             "headline": "Back to full suction",
-            "quote": "Ecovacs filters and brushes fit perfectly. Robot vacuum is back to full suction. Clear model guide made it easy to find the right part.",
+            "quote": "Ecovacs filters and brushes fit perfectly. Robot vacuum is back to full suction.",
             "name": "Tom R.",
             "location": "Perth, WA",
             "verified": true
@@ -2106,7 +2862,7 @@
           "settings": {
             "stars": 5,
             "headline": "Incredibly fast delivery",
-            "quote": "Ordered at night, shipped next morning. Part arrived fast and the support team helped me confirm it was the right one before I bought.",
+            "quote": "Ordered at night, shipped next morning. Part arrived fast and the support team helped me before I bought.",
             "name": "Nina P.",
             "location": "Adelaide, SA",
             "verified": true
@@ -2117,7 +2873,7 @@
           "settings": {
             "stars": 5,
             "headline": "Saved hundreds vs a new appliance",
-            "quote": "Was about to buy a whole new vacuum for $800. This $35 part fixed it completely. The Part Authority saved me a fortune. Absolute legend.",
+            "quote": "Was about to buy a whole new vacuum for $800. This $35 part fixed it completely. The Part Authority saved me a fortune.",
             "name": "David L.",
             "location": "Gold Coast, QLD",
             "verified": true

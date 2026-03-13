@@ -35,14 +35,24 @@
         <div class="tpa-pdp__gallery" data-tpa-gallery>
           {% assign featured = product.featured_media %}
           {% if featured %}
-            <div class="tpa-pdp__stage" data-tpa-stage data-tpa-zoom>
-              {% render 'tpa-pdp-media', media: featured, index: 0 %}
+            <div class="tpa-pdp__stage" data-tpa-stage data-tpa-zoom data-active-media-id="{{ featured.id }}">
+              <div class="tpa-pdp__stage-media" data-tpa-stage-media>
+                {% render 'tpa-pdp-media', media: featured, index: 0 %}
+              </div>
               {% if section.settings.media_badge_enable %}
                 <div class="tpa-pdp__media-badge">
                   <span class="tpa-pdp__media-badge-dot" aria-hidden="true"></span>
                   <span>{{ section.settings.media_badge_text }}</span>
                 </div>
               {% endif %}
+            </div>
+
+            <div class="tpa-pdp__media-templates" hidden>
+              {% for media in product.media %}
+                <template data-tpa-template="{{ media.id }}">
+                  {% render 'tpa-pdp-media', media: media, index: forloop.index0 %}
+                </template>
+              {% endfor %}
             </div>
           {% endif %}
 
@@ -1113,14 +1123,21 @@
 
     /* --- Gallery thumbnail switching with transition --- */
     var stage = root.querySelector('[data-tpa-stage]');
+    var stageMedia = root.querySelector('[data-tpa-stage-media]');
     var thumbs = root.querySelectorAll('[data-tpa-thumb]');
-    if (stage && thumbs.length > 1){
+    if (stage && stageMedia && thumbs.length > 1){
       thumbs.forEach(function(thumb){
         thumb.addEventListener('click', function(){
+          var mediaId = thumb.getAttribute('data-media-id');
+          var template = root.querySelector('[data-tpa-template="' + mediaId + '"]');
+          if (!template) return;
+          if (stage.getAttribute('data-active-media-id') === mediaId) return;
           thumbs.forEach(function(t){ t.classList.remove('is-active'); });
           thumb.classList.add('is-active');
           stage.classList.add('is-switching');
           setTimeout(function(){
+            stageMedia.innerHTML = template.innerHTML;
+            stage.setAttribute('data-active-media-id', mediaId);
             stage.classList.remove('is-switching');
           }, 300);
         });
