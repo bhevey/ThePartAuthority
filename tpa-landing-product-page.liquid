@@ -305,6 +305,30 @@
             </button>
           </div>
 
+          {%- comment -%} Accelerated checkout (Shop Pay, Apple Pay, Google Pay) {%- endcomment -%}
+          {% if v.available %}
+            <div class="tpa-lp__dynamic-checkout">
+              {{ form | payment_button }}
+            </div>
+          {% endif %}
+
+          {%- comment -%} Security & payment badges {%- endcomment -%}
+          <div class="tpa-lp__pay-badges">
+            <div class="tpa-lp__pay-badges-row">
+              <svg class="tpa-lp__pay-lock" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span class="tpa-lp__pay-label">Secure Checkout</span>
+              <span class="tpa-lp__pay-divider" aria-hidden="true"></span>
+              {%- comment -%} Visa {%- endcomment -%}
+              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visa"><rect width="38" height="24" rx="3" fill="#1A1F71"/><path d="M15.6 16.4l1.7-10.2h2.7l-1.7 10.2h-2.7zm11.1-10l-2.5 7-1-3.4-.3-1.6c-.5-1.3-2-2.7-3.7-3.4l2.3 8.8h2.8l4.2-10.2h-2.8v2.8zm-17.3 0L7 16.4h2.8L12 6.4H9.4zm22.3 0h-2.2c-.7 0-1.2.2-1.5.8l-4 9.4h2.8l.6-1.5h3.4l.3 1.5h2.5l-1.9-10.2zm-3.5 6.6l1.4-3.8.8 3.8h-2.2z" fill="#fff"/></svg>
+              {%- comment -%} Mastercard {%- endcomment -%}
+              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mastercard"><rect width="38" height="24" rx="3" fill="#252525"/><circle cx="15" cy="12" r="7" fill="#EB001B"/><circle cx="23" cy="12" r="7" fill="#F79E1B"/><path d="M19 7.5a7 7 0 0 1 0 9A7 7 0 0 1 19 7.5z" fill="#FF5F00"/></svg>
+              {%- comment -%} Amex {%- endcomment -%}
+              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amex"><rect width="38" height="24" rx="3" fill="#2557D6"/><text x="19" y="15.5" text-anchor="middle" fill="#fff" font-size="7" font-weight="700" font-family="Arial,sans-serif">AMEX</text></svg>
+              {%- comment -%} PayPal {%- endcomment -%}
+              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayPal"><rect width="38" height="24" rx="3" fill="#F5F7FA"/><text x="19" y="15" text-anchor="middle" fill="#253B80" font-size="7" font-weight="700" font-family="Arial,sans-serif">Pay</text><text x="19" y="15" text-anchor="middle" fill="#179BD7" font-size="7" font-weight="700" font-family="Arial,sans-serif" dx="9">Pal</text></svg>
+            </div>
+          </div>
+
           {%- comment -%} Trust strip (inline, below ATC) {%- endcomment -%}
           <div class="tpa-lp__trust-strip">
             {% if is_part %}
@@ -319,6 +343,30 @@
               <div class="tpa-lp__trust-item"><span class="tpa-lp__trust-check" aria-hidden="true">✓</span> {{ section.settings.trust_app_4 }}</div>
             {% endif %}
           </div>
+
+          {%- comment -%} Postcode shipping calculator (appliances only) {%- endcomment -%}
+          {% if is_appliance %}
+            <div class="tpa-lp__postcode" data-tpa-lp-postcode>
+              <div class="tpa-lp__postcode-header">
+                <svg class="tpa-lp__postcode-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+              <span class="tpa-lp__postcode-title">Calculate Shipping</span>
+            </div>
+            <div class="tpa-lp__postcode-form">
+              <input
+                class="tpa-lp__postcode-input"
+                type="text"
+                inputmode="numeric"
+                maxlength="4"
+                pattern="[0-9]{4}"
+                placeholder="Enter postcode"
+                data-tpa-lp-postcode-input
+                aria-label="Australian postcode"
+              >
+              <button class="tpa-lp__postcode-btn" type="button" data-tpa-lp-postcode-btn>Check</button>
+            </div>
+            <div class="tpa-lp__postcode-result" data-tpa-lp-postcode-result hidden></div>
+          </div>
+          {% endif %}
 
           {%- comment -%} Sticky mobile bar {%- endcomment -%}
           <div class="tpa-lp__sticky" data-tpa-lp-sticky>
@@ -567,7 +615,15 @@
     </div>
 
     {%- comment -%} ══════════════════════════════════════════
-      10. FINAL CTA BANNER
+      10. RECENTLY VIEWED PRODUCTS
+    {%- endcomment -%}
+    <div class="tpa-lp__recently-viewed" data-tpa-lp-recently-viewed hidden>
+      <h2 class="tpa-lp__section-title">Recently Viewed</h2>
+      <div class="tpa-lp__rv-rail" data-tpa-lp-rv-rail></div>
+    </div>
+
+    {%- comment -%} ══════════════════════════════════════════
+      11. FINAL CTA BANNER
     {%- endcomment -%}
     <div class="tpa-lp__final-cta" data-tpa-lp-section>
       <div class="tpa-lp__final-orb" aria-hidden="true"></div>
@@ -584,6 +640,50 @@
 
   </div>
 </section>
+
+{%- comment -%} ══════════════════════════════════════════
+  JSON-LD STRUCTURED DATA
+{%- endcomment -%}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": {{ product.title | json }},
+  "description": {{ product.description | strip_html | truncate: 5000 | json }},
+  "sku": {{ v.sku | json }},
+  {% if product.featured_image %}
+  "image": [
+    {{ product.featured_image | image_url: width: 1200 | json }}{% for media in product.media offset: 1 limit: 4 %}{% if media.preview_image %},
+    {{ media.preview_image | image_url: width: 1200 | json }}{% endif %}{% endfor %}
+  ],
+  {% endif %}
+  "brand": {
+    "@type": "Brand",
+    "name": {{ product.vendor | json }}
+  },
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ shop.url }}{{ product.url }}",
+    "priceCurrency": {{ cart.currency.iso_code | json }},
+    "price": {{ v.price | money_without_currency | remove: ',' | json }},
+    {% if compare > price %}
+    "priceValidUntil": "{{ 'now' | date: '%Y' | plus: 1 }}-12-31",
+    {% endif %}
+    "availability": "https://schema.org/{% if v.available %}InStock{% else %}OutOfStock{% endif %}",
+    "seller": {
+      "@type": "Organization",
+      "name": {{ shop.name | json }}
+    }
+  }{% if section.settings.rating_stars and section.settings.rating_count %},
+  "aggregateRating": {
+    "@type": "AggregateRating",
+    "ratingValue": {{ section.settings.rating_stars | json }},
+    "reviewCount": {{ section.settings.rating_count | remove: ',' | json }},
+    "bestRating": "5",
+    "worstRating": "1"
+  }{% endif %}
+}
+</script>
 
 <style>
   /* ═══════════════════════════════════════════════════════════
@@ -2185,6 +2285,231 @@
     pointer-events: none;
   }
 
+  /* ── ACCELERATED CHECKOUT ── */
+  .tpa-lp--{{ sid }} .tpa-lp__dynamic-checkout{
+    margin-top: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__dynamic-checkout .shopify-payment-button{
+    margin: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__dynamic-checkout .shopify-payment-button__button{
+    border-radius: 14px !important;
+    min-height: 48px !important;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__dynamic-checkout .shopify-payment-button__button--unbranded{
+    background: #000 !important;
+    color: #fff !important;
+    font-weight: 900 !important;
+  }
+
+  /* ── PAYMENT BADGES ── */
+  .tpa-lp--{{ sid }} .tpa-lp__pay-badges{
+    margin-top: 12px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__pay-badges-row{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__pay-lock{
+    color: rgba(22, 163, 74, 0.85);
+    flex-shrink: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__pay-label{
+    font-size: 11px;
+    font-weight: 900;
+    color: rgba(var(--color-foreground), 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__pay-divider{
+    width: 1px;
+    height: 16px;
+    background: rgba(var(--color-foreground), 0.12);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__pay-icon{
+    width: 34px;
+    height: 22px;
+    border-radius: 4px;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    flex-shrink: 0;
+  }
+
+  /* ── POSTCODE SHIPPING CALCULATOR ── */
+  .tpa-lp--{{ sid }} .tpa-lp__postcode{
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255, 255, 255, 0.88);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-header{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-icon{
+    color: rgba(var(--color-foreground), 0.65);
+    flex-shrink: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-title{
+    font-size: 12px;
+    font-weight: 950;
+    color: rgba(var(--color-foreground), 0.78);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-form{
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-input{
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid rgba(15, 23, 42, 0.12);
+    background: #fff;
+    padding: 0 12px;
+    font-size: 14px;
+    font-weight: 800;
+    color: rgb(var(--color-foreground));
+    outline: none;
+    transition: border-color 180ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-input:focus{
+    border-color: rgba(29, 91, 255, 0.45);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-btn{
+    height: 40px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(29, 91, 255, 0.95);
+    color: #fff;
+    font-weight: 950;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 180ms ease, transform 100ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-btn:hover{
+    background: rgba(29, 91, 255, 1);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-btn:active{
+    transform: scale(0.96);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-btn:disabled{
+    opacity: 0.6;
+    cursor: default;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-result{
+    margin-top: 10px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.5;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-result[hidden]{ display: none; }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-result--success{
+    background: rgba(22, 163, 74, 0.08);
+    border: 1px solid rgba(22, 163, 74, 0.15);
+    color: rgba(22, 163, 74, 0.95);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-result--rates{
+    background: rgba(29, 91, 255, 0.05);
+    border: 1px solid rgba(29, 91, 255, 0.12);
+    color: rgba(var(--color-foreground), 0.80);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-result--error{
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.12);
+    color: rgba(239, 68, 68, 0.90);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-rate{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-rate + .tpa-lp__postcode-rate{
+    border-top: 1px solid rgba(29, 91, 255, 0.08);
+    margin-top: 4px;
+    padding-top: 8px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-rate-name{
+    font-weight: 800;
+    font-size: 13px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-rate-price{
+    font-weight: 950;
+    font-size: 13px;
+    color: rgba(29, 91, 255, 0.95);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__postcode-rate-price--free{
+    color: rgba(22, 163, 74, 0.95);
+  }
+
+  /* ── RECENTLY VIEWED ── */
+  .tpa-lp--{{ sid }} .tpa-lp__recently-viewed{
+    margin-top: 32px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__recently-viewed[hidden]{ display: none; }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-rail{
+    margin-top: 18px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(200px, 1fr);
+    gap: 14px;
+    overflow-x: auto;
+    padding: 4px 2px 10px;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-rail::-webkit-scrollbar{ display: none; }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-card{
+    scroll-snap-align: start;
+    border-radius: 16px;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.90);
+    box-shadow: 0 14px 40px rgba(2, 6, 23, 0.06), 0 4px 12px rgba(2, 6, 23, 0.04);
+    overflow: hidden;
+    text-decoration: none;
+    display: block;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-card:hover{
+    transform: translateY(-3px);
+    box-shadow: 0 18px 48px rgba(2, 6, 23, 0.10);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-img{
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    background: rgba(15, 23, 42, 0.04);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-info{
+    padding: 12px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-title{
+    font-weight: 950;
+    font-size: 13px;
+    color: rgb(var(--color-foreground));
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__rv-price{
+    margin-top: 6px;
+    font-weight: 950;
+    font-size: 15px;
+    color: rgba(var(--color-foreground), 0.88);
+  }
+
   /* ══════════ RESPONSIVE ══════════ */
   @media (max-width: 980px){
     .tpa-lp--{{ sid }}{
@@ -2787,6 +3112,133 @@
       e.preventDefault();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
+  }
+
+  /* ── Postcode shipping calculator (appliances) ── */
+  var postcodeInput = root.querySelector('[data-tpa-lp-postcode-input]');
+  var postcodeBtn = root.querySelector('[data-tpa-lp-postcode-btn]');
+  var postcodeResult = root.querySelector('[data-tpa-lp-postcode-result]');
+
+  if (postcodeInput && postcodeBtn && postcodeResult){
+    function fetchShippingRates(postcode){
+      postcodeBtn.disabled = true;
+      postcodeBtn.textContent = '...';
+      postcodeResult.hidden = true;
+      postcodeResult.className = 'tpa-lp__postcode-result';
+
+      /* Add the current product to cart temporarily to get rates */
+      var variantId = variantInput ? variantInput.value : {{ v.id | json }};
+
+      fetch('/cart/shipping_rates.json?shipping_address%5Bzip%5D=' + encodeURIComponent(postcode) + '&shipping_address%5Bcountry%5D=AU', {
+        credentials: 'same-origin'
+      })
+      .then(function(r){
+        if (!r.ok) throw new Error('No rates');
+        return r.json();
+      })
+      .then(function(data){
+        var rates = data.shipping_rates || [];
+        if (!rates.length){
+          postcodeResult.className = 'tpa-lp__postcode-result tpa-lp__postcode-result--error';
+          postcodeResult.innerHTML = 'No shipping rates available for this postcode. Please contact us for a quote.';
+          postcodeResult.hidden = false;
+          return;
+        }
+
+        var hasFree = rates.some(function(r){ return parseFloat(r.price) === 0; });
+
+        if (hasFree){
+          postcodeResult.className = 'tpa-lp__postcode-result tpa-lp__postcode-result--success';
+          postcodeResult.innerHTML = '<strong>Free delivery to ' + postcode + '!</strong>';
+        } else {
+          var html = '';
+          rates.forEach(function(rate){
+            var price = parseFloat(rate.price);
+            var priceClass = price === 0 ? 'tpa-lp__postcode-rate-price tpa-lp__postcode-rate-price--free' : 'tpa-lp__postcode-rate-price';
+            var priceText = price === 0 ? 'FREE' : '$' + price.toFixed(2);
+            html += '<div class="tpa-lp__postcode-rate">';
+            html += '<span class="tpa-lp__postcode-rate-name">' + rate.name + '</span>';
+            html += '<span class="' + priceClass + '">' + priceText + '</span>';
+            html += '</div>';
+          });
+          postcodeResult.className = 'tpa-lp__postcode-result tpa-lp__postcode-result--rates';
+          postcodeResult.innerHTML = html;
+        }
+
+        postcodeResult.hidden = false;
+      })
+      .catch(function(){
+        postcodeResult.className = 'tpa-lp__postcode-result tpa-lp__postcode-result--error';
+        postcodeResult.innerHTML = 'Unable to calculate shipping. Add to cart to see rates at checkout.';
+        postcodeResult.hidden = false;
+      })
+      .finally(function(){
+        postcodeBtn.disabled = false;
+        postcodeBtn.textContent = 'Check';
+      });
+    }
+
+    postcodeBtn.addEventListener('click', function(){
+      var postcode = postcodeInput.value.trim();
+      if (!/^\d{4}$/.test(postcode)){
+        postcodeResult.className = 'tpa-lp__postcode-result tpa-lp__postcode-result--error';
+        postcodeResult.innerHTML = 'Please enter a valid 4-digit Australian postcode.';
+        postcodeResult.hidden = false;
+        return;
+      }
+      fetchShippingRates(postcode);
+    });
+
+    postcodeInput.addEventListener('keydown', function(e){
+      if (e.key === 'Enter'){
+        e.preventDefault();
+        postcodeBtn.click();
+      }
+    });
+  }
+
+  /* ── Recently Viewed Products ── */
+  var rvSection = root.querySelector('[data-tpa-lp-recently-viewed]');
+  var rvRail = root.querySelector('[data-tpa-lp-rv-rail]');
+
+  if (rvSection && rvRail){
+    var RV_KEY = 'tpa_recently_viewed';
+    var MAX_RV = 8;
+    var currentHandle = {{ product.handle | json }};
+    var currentProduct = {
+      handle: currentHandle,
+      title: {{ product.title | json }},
+      url: {{ product.url | json }},
+      price: {{ v.price | money | json }},
+      image: {{ product.featured_image | image_url: width: 400 | json }}
+    };
+
+    /* Save current product */
+    try {
+      var stored = JSON.parse(localStorage.getItem(RV_KEY) || '[]');
+      stored = stored.filter(function(p){ return p.handle !== currentHandle; });
+      stored.unshift(currentProduct);
+      if (stored.length > MAX_RV) stored = stored.slice(0, MAX_RV);
+      localStorage.setItem(RV_KEY, JSON.stringify(stored));
+
+      /* Render recently viewed (exclude current product) */
+      var toShow = stored.filter(function(p){ return p.handle !== currentHandle; });
+      if (toShow.length > 0){
+        var html = '';
+        toShow.forEach(function(p){
+          html += '<a class="tpa-lp__rv-card" href="' + p.url + '">';
+          if (p.image){
+            html += '<img class="tpa-lp__rv-img" src="' + p.image + '" alt="' + p.title.replace(/"/g, '&quot;') + '" loading="lazy" width="200" height="200">';
+          }
+          html += '<div class="tpa-lp__rv-info">';
+          html += '<div class="tpa-lp__rv-title">' + p.title + '</div>';
+          html += '<div class="tpa-lp__rv-price">' + p.price + '</div>';
+          html += '</div></a>';
+        });
+        rvRail.innerHTML = html;
+        rvSection.hidden = false;
+      }
+    } catch(e){}
   }
 })();
 </script>
