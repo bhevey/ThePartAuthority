@@ -1448,6 +1448,31 @@
     if (postcodeInput && postcodeBtn && postcodeResult){
       var variantIdInput = root.querySelector('[data-tpa-variant-id]');
 
+      /* Poll Shopify shipping rates endpoint — it returns 422 while calculating */
+      function pollShippingRates(postcode, attempt){
+        var maxAttempts = 6;
+        if (attempt > maxAttempts){
+          return Promise.reject(new Error('timeout'));
+        }
+
+        var ratesUrl = '/cart/shipping_rates.json?shipping_address[zip]=' + encodeURIComponent(postcode)
+          + '&shipping_address[country]=Australia'
+          + '&shipping_address[province]=';
+
+        return fetch(ratesUrl, { credentials: 'same-origin' })
+          .then(function(r){
+            if (r.status === 422){
+              return new Promise(function(resolve){
+                setTimeout(resolve, 800);
+              }).then(function(){
+                return pollShippingRates(postcode, attempt + 1);
+              });
+            }
+            if (!r.ok) throw new Error('Failed: ' + r.status);
+            return r.json();
+          });
+      }
+
       function fetchShippingRates(postcode){
         postcodeBtn.disabled = true;
         postcodeBtn.textContent = '...';
@@ -1457,13 +1482,11 @@
         var vid = variantIdInput ? variantIdInput.value : {{ product.selected_or_first_available_variant.id | json }};
         var savedCart = null;
 
-        /* 1. Save current cart state */
         fetch('/cart.js', { credentials: 'same-origin' })
         .then(function(r){ return r.json(); })
         .then(function(cart){
           savedCart = cart;
 
-          /* 2. Add this product to cart so rates can be calculated */
           return fetch('/cart/add.js', {
             method: 'POST',
             credentials: 'same-origin',
@@ -1473,14 +1496,7 @@
         })
         .then(function(r){ return r.json(); })
         .then(function(){
-          /* 3. Fetch shipping rates */
-          return fetch('/cart/shipping_rates.json?shipping_address%5Bzip%5D=' + encodeURIComponent(postcode) + '&shipping_address%5Bcountry%5D=AU&shipping_address%5Bcountry_code%5D=AU', {
-            credentials: 'same-origin'
-          });
-        })
-        .then(function(r){
-          if (!r.ok) throw new Error('No rates');
-          return r.json();
+          return pollShippingRates(postcode, 1);
         })
         .then(function(data){
           var rates = data.shipping_rates || [];
@@ -1519,24 +1535,18 @@
           postcodeResult.hidden = false;
         })
         .finally(function(){
-          /* 4. Restore original cart */
-          if (savedCart){
-            var restoreItems = {};
-            if (savedCart.items && savedCart.items.length){
-              savedCart.items.forEach(function(item){
-                restoreItems[item.variant_id] = item.quantity;
-              });
-            }
+          var doRestore = function(){
+            if (!savedCart) return Promise.resolve();
 
-            fetch('/cart/clear.js', {
+            return fetch('/cart/clear.js', {
               method: 'POST',
               credentials: 'same-origin',
               headers: { 'Content-Type': 'application/json' }
             })
             .then(function(){
-              if (Object.keys(restoreItems).length){
-                var addItems = Object.keys(restoreItems).map(function(vid){
-                  return { id: parseInt(vid, 10), quantity: restoreItems[vid] };
+              if (savedCart.items && savedCart.items.length){
+                var addItems = savedCart.items.map(function(item){
+                  return { id: item.variant_id, quantity: item.quantity };
                 });
                 return fetch('/cart/add.js', {
                   method: 'POST',
@@ -1547,10 +1557,12 @@
               }
             })
             .catch(function(){});
-          }
+          };
 
-          postcodeBtn.disabled = false;
-          postcodeBtn.textContent = 'Check';
+          doRestore().then(function(){
+            postcodeBtn.disabled = false;
+            postcodeBtn.textContent = 'Check';
+          });
         });
       }
 
