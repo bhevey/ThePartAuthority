@@ -312,20 +312,11 @@
             </div>
           {% endif %}
 
-          {%- comment -%} Security & payment badges {%- endcomment -%}
+          {%- comment -%} Secure checkout badge {%- endcomment -%}
           <div class="tpa-lp__pay-badges">
             <div class="tpa-lp__pay-badges-row">
               <svg class="tpa-lp__pay-lock" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
               <span class="tpa-lp__pay-label">Secure Checkout</span>
-              <span class="tpa-lp__pay-divider" aria-hidden="true"></span>
-              {%- comment -%} Visa {%- endcomment -%}
-              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Visa"><rect width="38" height="24" rx="3" fill="#1A1F71"/><path d="M15.6 16.4l1.7-10.2h2.7l-1.7 10.2h-2.7zm11.1-10l-2.5 7-1-3.4-.3-1.6c-.5-1.3-2-2.7-3.7-3.4l2.3 8.8h2.8l4.2-10.2h-2.8v2.8zm-17.3 0L7 16.4h2.8L12 6.4H9.4zm22.3 0h-2.2c-.7 0-1.2.2-1.5.8l-4 9.4h2.8l.6-1.5h3.4l.3 1.5h2.5l-1.9-10.2zm-3.5 6.6l1.4-3.8.8 3.8h-2.2z" fill="#fff"/></svg>
-              {%- comment -%} Mastercard {%- endcomment -%}
-              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mastercard"><rect width="38" height="24" rx="3" fill="#252525"/><circle cx="15" cy="12" r="7" fill="#EB001B"/><circle cx="23" cy="12" r="7" fill="#F79E1B"/><path d="M19 7.5a7 7 0 0 1 0 9A7 7 0 0 1 19 7.5z" fill="#FF5F00"/></svg>
-              {%- comment -%} Amex {%- endcomment -%}
-              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Amex"><rect width="38" height="24" rx="3" fill="#2557D6"/><text x="19" y="15.5" text-anchor="middle" fill="#fff" font-size="7" font-weight="700" font-family="Arial,sans-serif">AMEX</text></svg>
-              {%- comment -%} PayPal {%- endcomment -%}
-              <svg class="tpa-lp__pay-icon" viewBox="0 0 38 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PayPal"><rect width="38" height="24" rx="3" fill="#F5F7FA"/><text x="19" y="15" text-anchor="middle" fill="#253B80" font-size="7" font-weight="700" font-family="Arial,sans-serif">Pay</text><text x="19" y="15" text-anchor="middle" fill="#179BD7" font-size="7" font-weight="700" font-family="Arial,sans-serif" dx="9">Pal</text></svg>
             </div>
           </div>
 
@@ -2323,18 +2314,6 @@
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
-  .tpa-lp--{{ sid }} .tpa-lp__pay-divider{
-    width: 1px;
-    height: 16px;
-    background: rgba(var(--color-foreground), 0.12);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__pay-icon{
-    width: 34px;
-    height: 22px;
-    border-radius: 4px;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    flex-shrink: 0;
-  }
 
   /* ── POSTCODE SHIPPING CALCULATOR ── */
   .tpa-lp--{{ sid }} .tpa-lp__postcode{
@@ -3126,11 +3105,29 @@
       postcodeResult.hidden = true;
       postcodeResult.className = 'tpa-lp__postcode-result';
 
-      /* Add the current product to cart temporarily to get rates */
-      var variantId = variantInput ? variantInput.value : {{ v.id | json }};
+      var vid = variantInput ? variantInput.value : {{ v.id | json }};
+      var savedCart = null;
 
-      fetch('/cart/shipping_rates.json?shipping_address%5Bzip%5D=' + encodeURIComponent(postcode) + '&shipping_address%5Bcountry%5D=AU', {
-        credentials: 'same-origin'
+      /* 1. Save current cart state */
+      fetch('/cart.js', { credentials: 'same-origin' })
+      .then(function(r){ return r.json(); })
+      .then(function(cart){
+        savedCart = cart;
+
+        /* 2. Add this product to cart (quantity 1) so rates can be calculated */
+        return fetch('/cart/add.js', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id: parseInt(vid, 10), quantity: 1 })
+        });
+      })
+      .then(function(r){ return r.json(); })
+      .then(function(){
+        /* 3. Fetch shipping rates with the postcode */
+        return fetch('/cart/shipping_rates.json?shipping_address%5Bzip%5D=' + encodeURIComponent(postcode) + '&shipping_address%5Bcountry%5D=AU&shipping_address%5Bcountry_code%5D=AU', {
+          credentials: 'same-origin'
+        });
       })
       .then(function(r){
         if (!r.ok) throw new Error('No rates');
@@ -3153,9 +3150,9 @@
         } else {
           var html = '';
           rates.forEach(function(rate){
-            var price = parseFloat(rate.price);
-            var priceClass = price === 0 ? 'tpa-lp__postcode-rate-price tpa-lp__postcode-rate-price--free' : 'tpa-lp__postcode-rate-price';
-            var priceText = price === 0 ? 'FREE' : '$' + price.toFixed(2);
+            var ratePrice = parseFloat(rate.price);
+            var priceClass = ratePrice === 0 ? 'tpa-lp__postcode-rate-price tpa-lp__postcode-rate-price--free' : 'tpa-lp__postcode-rate-price';
+            var priceText = ratePrice === 0 ? 'FREE' : '$' + ratePrice.toFixed(2);
             html += '<div class="tpa-lp__postcode-rate">';
             html += '<span class="tpa-lp__postcode-rate-name">' + rate.name + '</span>';
             html += '<span class="' + priceClass + '">' + priceText + '</span>';
@@ -3169,10 +3166,40 @@
       })
       .catch(function(){
         postcodeResult.className = 'tpa-lp__postcode-result tpa-lp__postcode-result--error';
-        postcodeResult.innerHTML = 'Unable to calculate shipping. Add to cart to see rates at checkout.';
+        postcodeResult.innerHTML = 'Unable to calculate shipping for this postcode. Please try again or contact us.';
         postcodeResult.hidden = false;
       })
       .finally(function(){
+        /* 4. Restore original cart by clearing and re-adding original items */
+        if (savedCart){
+          var restoreItems = {};
+          if (savedCart.items && savedCart.items.length){
+            savedCart.items.forEach(function(item){
+              restoreItems[item.variant_id] = item.quantity;
+            });
+          }
+
+          fetch('/cart/clear.js', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/json' }
+          })
+          .then(function(){
+            if (Object.keys(restoreItems).length){
+              var addItems = Object.keys(restoreItems).map(function(vid){
+                return { id: parseInt(vid, 10), quantity: restoreItems[vid] };
+              });
+              return fetch('/cart/add.js', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: addItems })
+              });
+            }
+          })
+          .catch(function(){});
+        }
+
         postcodeBtn.disabled = false;
         postcodeBtn.textContent = 'Check';
       });
