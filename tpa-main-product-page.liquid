@@ -1450,9 +1450,9 @@
 
       /* Poll Shopify shipping rates endpoint — it returns 422 while calculating */
       function pollShippingRates(postcode, attempt){
-        var maxAttempts = 6;
+        var maxAttempts = 8;
         if (attempt > maxAttempts){
-          return Promise.reject(new Error('timeout'));
+          return Promise.reject(new Error('timeout after ' + maxAttempts + ' attempts'));
         }
 
         var ratesUrl = '/cart/shipping_rates.json?shipping_address[zip]=' + encodeURIComponent(postcode)
@@ -1463,12 +1463,16 @@
           .then(function(r){
             if (r.status === 422){
               return new Promise(function(resolve){
-                setTimeout(resolve, 800);
+                setTimeout(resolve, 1200);
               }).then(function(){
                 return pollShippingRates(postcode, attempt + 1);
               });
             }
-            if (!r.ok) throw new Error('Failed: ' + r.status);
+            if (!r.ok){
+              return r.text().then(function(body){
+                throw new Error('Rates HTTP ' + r.status + ': ' + body.substring(0, 200));
+              });
+            }
             return r.json();
           });
       }
@@ -1481,11 +1485,17 @@
 
         var vid = variantIdInput ? variantIdInput.value : {{ product.selected_or_first_available_variant.id | json }};
         var savedCart = null;
+        var debugSteps = [];
 
         fetch('/cart.js', { credentials: 'same-origin' })
-        .then(function(r){ return r.json(); })
+        .then(function(r){
+          debugSteps.push('1-cart-get: ' + r.status);
+          if (!r.ok) throw new Error('Cart GET failed: ' + r.status);
+          return r.json();
+        })
         .then(function(cart){
           savedCart = cart;
+          debugSteps.push('1-cart-items: ' + (cart.items ? cart.items.length : 0));
 
           return fetch('/cart/add.js', {
             method: 'POST',
@@ -1494,11 +1504,17 @@
             body: JSON.stringify({ id: parseInt(vid, 10), quantity: 1 })
           });
         })
-        .then(function(r){ return r.json(); })
-        .then(function(){
+        .then(function(r){
+          debugSteps.push('2-cart-add: ' + r.status);
+          if (!r.ok) return r.text().then(function(t){ throw new Error('Cart ADD failed: ' + r.status + ' ' + t); });
+          return r.json();
+        })
+        .then(function(addResult){
+          debugSteps.push('2-added-id: ' + (addResult.variant_id || addResult.id || 'unknown'));
           return pollShippingRates(postcode, 1);
         })
         .then(function(data){
+          debugSteps.push('3-rates-ok');
           var rates = data.shipping_rates || [];
           if (!rates.length){
             postcodeResult.className = 'tpa-pdp__postcode-result tpa-pdp__postcode-result--error';
@@ -1529,10 +1545,11 @@
 
           postcodeResult.hidden = false;
         })
-        .catch(function(){
+        .catch(function(err){
           postcodeResult.className = 'tpa-pdp__postcode-result tpa-pdp__postcode-result--error';
-          postcodeResult.innerHTML = 'Unable to calculate shipping for this postcode. Please try again or contact us.';
+          postcodeResult.innerHTML = '<strong>Shipping calculation error</strong><br><small style="opacity:.7">Debug: ' + debugSteps.join(' → ') + ' → ERR: ' + (err && err.message ? err.message : String(err)) + '</small>';
           postcodeResult.hidden = false;
+          console.error('TPA Shipping Debug:', debugSteps, err);
         })
         .finally(function(){
           var doRestore = function(){
