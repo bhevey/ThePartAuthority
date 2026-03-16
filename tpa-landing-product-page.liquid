@@ -3101,7 +3101,7 @@
   if (postcodeInput && postcodeBtn && postcodeResult){
     /* Poll Shopify shipping rates endpoint — it returns 422 while calculating */
     function pollShippingRates(postcode, attempt){
-      var maxAttempts = 8;
+      var maxAttempts = 15;
       if (attempt > maxAttempts){
         return Promise.reject(new Error('timeout after ' + maxAttempts + ' attempts'));
       }
@@ -3113,9 +3113,10 @@
       return fetch(ratesUrl, { credentials: 'same-origin' })
         .then(function(r){
           if (r.status === 422){
-            /* Rates still being calculated — wait and retry */
+            /* Exponential backoff: 800, 1200, 1800, 2700… capped at 4000ms */
+            var delay = Math.min(800 * Math.pow(1.5, attempt - 1), 4000);
             return new Promise(function(resolve){
-              setTimeout(resolve, 1200);
+              setTimeout(resolve, delay);
             }).then(function(){
               return pollShippingRates(postcode, attempt + 1);
             });
