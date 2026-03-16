@@ -178,7 +178,7 @@
 
         {%- comment -%} Price block {%- endcomment -%}
         <div class="tpa-lp__price-block" data-tpa-lp-price>
-          {% if is_appliance %}
+          {% if is_appliance and product.metafields.tpa.free_metro_shipping %}
             <div class="tpa-lp__price-offer">
               <span class="tpa-lp__price-offer-dot" aria-hidden="true"></span>
               <span>FREE SHIPPING TO METRO AREAS</span>
