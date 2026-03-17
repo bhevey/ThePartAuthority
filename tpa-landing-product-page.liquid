@@ -212,20 +212,8 @@
                   with
                 </span>
                 <span class="tpa-lp__afterpay-logo" aria-label="Afterpay">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="80" height="16" viewBox="0 0 100 20" role="img" aria-label="Afterpay logo">
-                    <title>Afterpay</title>
-                    <g fill="#B2FCE4">
-                      <path d="M6.525 15.025L0 5h5.075l3.5 5.95L12.05 5h5.075l-6.525 10.025V20H6.525v-4.975z"/>
-                      <path d="M25.5 5h4.675v15H25.5v-1.6c-1.15 1.275-2.775 2-4.55 2-3.825 0-6.9-3.35-6.9-7.9s3.075-7.9 6.9-7.9c1.775 0 3.4.725 4.55 2V5zm-3.825 11.625c2.15 0 3.9-1.7 3.9-4.125s-1.75-4.125-3.9-4.125-3.9 1.7-3.9 4.125 1.75 4.125 3.9 4.125z"/>
-                      <path d="M43.8 12.5c0 4.55-3.075 7.9-6.9 7.9-1.775 0-3.4-.725-4.55-2V25h-4.675V5h4.675v1.6c1.15-1.275 2.775-2 4.55-2 3.825 0 6.9 3.35 6.9 7.9zm-4.575 0c0-2.425-1.75-4.125-3.9-4.125S31.425 10.075 31.425 12.5s1.75 4.125 3.9 4.125 3.9-1.7 3.9-4.125z"/>
-                    </g>
-                    <g fill="#000">
-                      <path d="M52.1 5h4.675v15H52.1v-1.6c-1.15 1.275-2.775 2-4.55 2-3.825 0-6.9-3.35-6.9-7.9s3.075-7.9 6.9-7.9c1.775 0 3.4.725 4.55 2V5zm-3.825 11.625c2.15 0 3.9-1.7 3.9-4.125s-1.75-4.125-3.9-4.125-3.9 1.7-3.9 4.125 1.75 4.125 3.9 4.125z"/>
-                      <path d="M65.025 2.75c0-.375.075-.75.225-1.075h4.675a2.742 2.742 0 00-.225 1.075v2.3h3.1v3.7h-3.1V20h-4.675V8.75h-2.6V5h2.6V2.75z"/>
-                      <path d="M83.15 14.85H73.1c.575 1.575 1.95 2.525 3.675 2.525 1.3 0 2.5-.525 3.35-1.425l2.95 2.5C81.725 19.95 79.725 20.75 77.3 20.75c-4.975 0-8.525-3.3-8.525-7.9 0-4.425 3.4-7.85 8.175-7.85 4.5 0 7.15 3.125 7.15 7.575 0 .75-.1 1.525-.25 2.275h-.7zM73.375 11.575h5.8c-.35-1.75-1.575-2.875-3.1-2.875-1.65 0-2.6 1.075-2.7 2.875z"/>
-                      <path d="M91.45 8.475c.775-2.2 2.35-3.675 4.55-3.675v5.075c-2.95-.2-4.55 1.2-4.55 3.95V20h-4.675V5h4.675v3.475z"/>
-                    </g>
-                  </svg>
+                  <svg class="tpa-lp__afterpay-mark" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2L2 22h20L12 2z" fill="#B2FCE4"/></svg>
+                  <span class="tpa-lp__afterpay-wordmark">Afterpay</span>
                 </span>
               </div>
               <a class="tpa-lp__afterpay-link" href="https://www.afterpay.com/en-AU/how-it-works" target="_blank" rel="noopener noreferrer">
@@ -1425,13 +1413,20 @@
   .tpa-lp--{{ sid }} .tpa-lp__afterpay-logo{
     display: inline-flex;
     align-items: center;
+    gap: 4px;
     position: relative;
-    top: 1px;
+    top: 0;
   }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-logo svg{
-    display: block;
-    height: 15px;
-    width: auto;
+  .tpa-lp--{{ sid }} .tpa-lp__afterpay-mark{
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__afterpay-wordmark{
+    font-size: 14px;
+    font-weight: 900;
+    letter-spacing: -0.01em;
+    color: rgb(var(--color-foreground));
   }
   .tpa-lp--{{ sid }} .tpa-lp__afterpay-link{
     display: inline-flex;
