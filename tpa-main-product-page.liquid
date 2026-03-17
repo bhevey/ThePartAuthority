@@ -122,6 +122,15 @@
             <div class="tpa-pdp__compare">{{ compare | money }}</div>
             <div class="tpa-pdp__save">Save {{ compare | minus: price | money }}</div>
           {% endif %}
+          <div class="tpa-pdp__price-note">Tax included. Shipping calculated at checkout.</div>
+          {%- comment -%} App blocks (e.g. Afterpay onsite messaging) {%- endcomment -%}
+          {% for block in section.blocks %}
+            {% if block.type == '@app' %}
+              <div class="tpa-pdp__app-block" {{ block.shopify_attributes }}>
+                {% render block %}
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
 
         {% form 'product', product, class: 'tpa-pdp__form', data-tpa-product-form: '' %}
@@ -281,15 +290,6 @@
             </button>
           </div>
         {% endform %}
-
-        {%- comment -%} App blocks (e.g. Afterpay onsite messaging) {%- endcomment -%}
-        {% for block in section.blocks %}
-          {% if block.type == '@app' %}
-            <div class="tpa-pdp__app-block" {{ block.shopify_attributes }}>
-              {% render block %}
-            </div>
-          {% endif %}
-        {% endfor %}
       </div>
     </div>
 
@@ -629,9 +629,15 @@
     color: rgba(29, 91, 255, 0.95);
   }
 
+  .tpa-pdp--{{ sid }} .tpa-pdp__price-note{
+    margin-top: 6px;
+    font-size: 12px;
+    color: rgba(var(--color-foreground), 0.55);
+    font-weight: 700;
+  }
   /* App blocks (Afterpay etc.) */
   .tpa-pdp--{{ sid }} .tpa-pdp__app-block{
-    margin-top: 12px;
+    margin-top: 4px;
   }
 
   .tpa-pdp--{{ sid }} .tpa-pdp__variants{

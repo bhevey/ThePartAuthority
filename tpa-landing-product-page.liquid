@@ -200,6 +200,14 @@
             {% endif %}
           </div>
           <div class="tpa-lp__price-note">{{ section.settings.price_note }}</div>
+          {%- comment -%} App blocks (e.g. Afterpay onsite messaging) {%- endcomment -%}
+          {% for block in section.blocks %}
+            {% if block.type == '@app' %}
+              <div class="tpa-lp__app-block" {{ block.shopify_attributes }}>
+                {% render block %}
+              </div>
+            {% endif %}
+          {% endfor %}
         </div>
 
         {%- comment -%} Stock urgency {%- endcomment -%}
@@ -352,15 +360,6 @@
             </button>
           </div>
         {% endform %}
-
-        {%- comment -%} App blocks (e.g. Afterpay onsite messaging) {%- endcomment -%}
-        {% for block in section.blocks %}
-          {% if block.type == '@app' %}
-            <div class="tpa-lp__app-block" {{ block.shopify_attributes }}>
-              {% render block %}
-            </div>
-          {% endif %}
-        {% endfor %}
       </div>
     </div>
 
@@ -1372,7 +1371,7 @@
 
   /* App blocks (Afterpay etc.) */
   .tpa-lp--{{ sid }} .tpa-lp__app-block{
-    margin-top: 12px;
+    margin-top: 4px;
   }
 
   /* Stock urgency */
