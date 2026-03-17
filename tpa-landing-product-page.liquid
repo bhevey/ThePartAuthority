@@ -200,28 +200,6 @@
             {% endif %}
           </div>
           <div class="tpa-lp__price-note">{{ section.settings.price_note }}</div>
-
-          {%- comment -%} Afterpay — appliance products only {%- endcomment -%}
-          {% if is_appliance %}
-            {% assign ap_instalment = price | divided_by: 4 %}
-            <div class="tpa-lp__afterpay" data-tpa-lp-afterpay>
-              <div class="tpa-lp__afterpay-inner">
-                <span class="tpa-lp__afterpay-text">
-                  or 4 interest-free payments of
-                  <strong class="tpa-lp__afterpay-amount" data-tpa-lp-afterpay-amount>{{ ap_instalment | money }}</strong>
-                  with
-                </span>
-                <span class="tpa-lp__afterpay-logo" aria-label="Afterpay">
-                  <svg class="tpa-lp__afterpay-mark" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2L2 22h20L12 2z" fill="#B2FCE4"/></svg>
-                  <span class="tpa-lp__afterpay-wordmark">Afterpay</span>
-                </span>
-              </div>
-              <a class="tpa-lp__afterpay-link" href="https://www.afterpay.com/en-AU/how-it-works" target="_blank" rel="noopener noreferrer">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                Learn more
-              </a>
-            </div>
-          {% endif %}
         </div>
 
         {%- comment -%} Stock urgency {%- endcomment -%}
@@ -374,6 +352,15 @@
             </button>
           </div>
         {% endform %}
+
+        {%- comment -%} App blocks (e.g. Afterpay onsite messaging) {%- endcomment -%}
+        {% for block in section.blocks %}
+          {% if block.type == '@app' %}
+            <div class="tpa-lp__app-block" {{ block.shopify_attributes }}>
+              {% render block %}
+            </div>
+          {% endif %}
+        {% endfor %}
       </div>
     </div>
 
@@ -1383,75 +1370,9 @@
     font-weight: 700;
   }
 
-  /* ── Afterpay Badge ── */
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay{
+  /* App blocks (Afterpay etc.) */
+  .tpa-lp--{{ sid }} .tpa-lp__app-block{
     margin-top: 12px;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(178, 252, 228, 0.10) 0%, rgba(178, 252, 228, 0.04) 100%);
-    border: 1px solid rgba(178, 252, 228, 0.22);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-inner{
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-text{
-    font-size: 13.5px;
-    line-height: 1.4;
-    color: rgba(var(--color-foreground), 0.72);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-amount{
-    font-weight: 900;
-    color: rgb(var(--color-foreground));
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-logo{
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    position: relative;
-    top: 0;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-mark{
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-wordmark{
-    font-size: 14px;
-    font-weight: 900;
-    letter-spacing: -0.01em;
-    color: rgb(var(--color-foreground));
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-link{
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    font-weight: 700;
-    color: rgba(var(--color-foreground), 0.45);
-    text-decoration: none;
-    transition: color 180ms ease;
-    margin-left: auto;
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-link:hover{
-    color: rgba(var(--color-foreground), 0.75);
-  }
-  .tpa-lp--{{ sid }} .tpa-lp__afterpay-link svg{
-    flex-shrink: 0;
-  }
-  @media (max-width: 620px){
-    .tpa-lp--{{ sid }} .tpa-lp__afterpay{
-      padding: 10px 14px;
-    }
-    .tpa-lp--{{ sid }} .tpa-lp__afterpay-link{
-      margin-left: 0;
-    }
   }
 
   /* Stock urgency */
@@ -3239,6 +3160,9 @@
     { "type": "text", "id": "final_cta_btn", "label": "Final CTA button", "default": "Order Now — Scroll to Top" }
   ],
   "blocks": [
+    {
+      "type": "@app"
+    },
     {
       "type": "review",
       "name": "Review",
