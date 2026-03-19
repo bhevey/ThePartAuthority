@@ -1,0 +1,719 @@
+{% comment %}
+  Section: TPA BBQ Category Page
+  Sub-category landing for BBQ – 3 cards with professional SVG icons,
+  hero banner, scroll-triggered animations, and full mobile responsiveness.
+{% endcomment %}
+
+<section class="tpa-bbq tpa-bbq--{{ section.id }} color-{{ section.settings.color_scheme }}">
+
+  {%- comment -%} ── Hero Banner ── {%- endcomment -%}
+  <div class="tpa-bbq__hero">
+    <div class="tpa-bbq__hero-bg" aria-hidden="true">
+      <div class="tpa-bbq__hero-orb tpa-bbq__hero-orb--1"></div>
+      <div class="tpa-bbq__hero-orb tpa-bbq__hero-orb--2"></div>
+      <div class="tpa-bbq__hero-dots"></div>
+    </div>
+    <div class="tpa-bbq__hero-inner">
+      <div class="tpa-bbq__hero-pill" data-tpa-bbq-reveal>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2C6.48 2 2 6 2 10c0 2.5 1.5 4.5 3 5.5V18a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-2.5c1.5-1 3-3 3-5.5 0-4-4.48-8-10-8z"/><line x1="8" y1="22" x2="16" y2="22"/><line x1="9" y1="20" x2="9" y2="22"/><line x1="15" y1="20" x2="15" y2="22"/></svg>
+        {{ section.settings.pill_text }}
+      </div>
+      {% if section.settings.heading != blank %}
+        <h1 class="tpa-bbq__hero-title" data-tpa-bbq-reveal>{{ section.settings.heading }}</h1>
+      {% endif %}
+      {% if section.settings.subheading != blank %}
+        <p class="tpa-bbq__hero-desc" data-tpa-bbq-reveal>{{ section.settings.subheading }}</p>
+      {% endif %}
+    </div>
+  </div>
+
+  {%- comment -%} ── Category Grid ── {%- endcomment -%}
+  <div class="tpa-bbq__body">
+    <div class="tpa-bbq__inner {% if section.settings.section_width == 'full-width' %}tpa-bbq__inner--full{% endif %}">
+
+      {% if section.settings.grid_heading != blank %}
+        <h2 class="tpa-bbq__grid-heading" data-tpa-bbq-reveal>{{ section.settings.grid_heading }}</h2>
+      {% endif %}
+
+      <div class="tpa-bbq__grid" data-tpa-bbq-grid>
+        {% for block in section.blocks %}
+          <a
+            class="tpa-bbq-card"
+            href="{{ block.settings.link | default: routes.all_products_collection_url }}"
+            {{ block.shopify_attributes }}
+            style="--accent: {{ block.settings.accent | default: section.settings.accent_color }}; --card-idx: {{ forloop.index0 }};"
+            data-tpa-bbq-card
+          >
+            {%- comment -%} Icon container with inline SVG ── {%- endcomment -%}
+            <div class="tpa-bbq-card__icon-wrap">
+              <div class="tpa-bbq-card__icon">
+                {% if block.settings.icon_image != blank %}
+                  <img
+                    src="{{ block.settings.icon_image | image_url: width: 160 }}"
+                    alt="{{ block.settings.title | escape }}"
+                    loading="lazy"
+                    width="44"
+                    height="44"
+                  >
+                {% else %}
+                  <span class="tpa-bbq-card__svg" aria-hidden="true">
+                    {%- liquid
+                      assign icon = block.settings.icon_style
+                      case icon
+                        when 'grill'
+                          echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="10" rx="9" ry="5"/><path d="M3 10c0 3 4 7 5 8"/><path d="M21 10c0 3-4 7-5 8"/><line x1="8" y1="18" x2="8" y2="22"/><line x1="16" y1="18" x2="16" y2="22"/><line x1="6" y1="22" x2="18" y2="22"/><path d="M9 6c0-1 .5-2 1.5-2.5"/><path d="M12 5c0-1 .5-2 1.5-2.5"/><path d="M15 6c0-1 .5-2 1.5-2.5"/></svg>'
+                        when 'accessories'
+                          echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l3.5 3.5"/><path d="M6.5 6.5L14 14"/><path d="M14 14l3.5 3.5c1 1 2.5 1 3.5 0s1-2.5 0-3.5L14 7"/><path d="M14 7L7 14"/><line x1="3" y1="21" x2="10" y2="14"/><circle cx="5" cy="19" r="1.5" fill="none"/><line x1="17" y1="3" x2="21" y2="3"/><line x1="19" y1="1" x2="19" y2="5"/></svg>'
+                        when 'fuel'
+                          echo '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C8 6 4 9.5 4 13a8 8 0 0 0 16 0c0-3.5-4-7-8-11z"/><path d="M12 22c-2.2 0-4-1.8-4-4 0-2 2-4 4-6 2 2 4 4 4 6 0 2.2-1.8 4-4 4z"/></svg>'
+                      endcase
+                    -%}
+                  </span>
+                {% endif %}
+              </div>
+              <div class="tpa-bbq-card__icon-glow" aria-hidden="true"></div>
+            </div>
+
+            {%- comment -%} Content ── {%- endcomment -%}
+            <div class="tpa-bbq-card__body">
+              <h3 class="tpa-bbq-card__title">{{ block.settings.title }}</h3>
+              {% if block.settings.kicker != blank %}
+                <div class="tpa-bbq-card__kicker">{{ block.settings.kicker }}</div>
+              {% endif %}
+              {% if block.settings.description != blank %}
+                <p class="tpa-bbq-card__desc">{{ block.settings.description }}</p>
+              {% endif %}
+            </div>
+
+            {%- comment -%} CTA ── {%- endcomment -%}
+            <div class="tpa-bbq-card__cta">
+              <span class="tpa-bbq-card__cta-label">{{ block.settings.cta_label }}</span>
+              <span class="tpa-bbq-card__arrow" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+              </span>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+
+{%- comment -%} ═══════════════════════════════ CSS ═══════════════════════════════ {%- endcomment -%}
+<style>
+  /* ── Root / Section ── */
+  .tpa-bbq--{{ section.id }}{
+    --tpa-accent: {{ section.settings.accent_color }};
+  }
+
+  /* ── Hero Banner ── */
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero{
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(165deg, #1A0A00 0%, #2D1200 40%, #1F0E00 100%);
+    padding: clamp(56px, 8vw, 96px) 24px clamp(48px, 6vw, 80px);
+    text-align: center;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-bg{
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-dots{
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.06) 1px, transparent 0);
+    background-size: 28px 28px;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-orb{
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: tpa-bbq-float 12s ease-in-out infinite alternate;
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-orb--1{
+    width: 500px;
+    height: 500px;
+    top: -120px;
+    left: -80px;
+    background: radial-gradient(circle, rgba(232, 93, 4, 0.30) 0%, transparent 70%);
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-orb--2{
+    width: 400px;
+    height: 400px;
+    bottom: -100px;
+    right: -60px;
+    background: radial-gradient(circle, rgba(255, 152, 56, 0.20) 0%, transparent 70%);
+    animation-delay: -6s;
+  }
+
+  @keyframes tpa-bbq-float{
+    0%{ transform: translate(0, 0) scale(1); }
+    100%{ transform: translate(30px, -20px) scale(1.08); }
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-inner{
+    position: relative;
+    z-index: 1;
+    max-width: 780px;
+    margin: 0 auto;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-pill{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.06);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: rgba(255,255,255,0.85);
+    margin-bottom: 24px;
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-pill svg{
+    color: #FF8C38;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-title{
+    margin: 0;
+    font-weight: 950;
+    letter-spacing: -0.035em;
+    line-height: 1.02;
+    font-size: clamp(32px, 5vw, 54px);
+    color: #FFFFFF;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__hero-desc{
+    margin: 16px auto 0;
+    max-width: 560px;
+    font-size: clamp(15px, 1.8vw, 18px);
+    line-height: 1.55;
+    color: rgba(255,255,255,0.65);
+  }
+
+  /* ── Body / Grid Area ── */
+  .tpa-bbq--{{ section.id }} .tpa-bbq__body{
+    padding: {{ section.settings.padding_top }}px 0 {{ section.settings.padding_bottom }}px;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__inner{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq__inner--full{
+    max-width: none;
+    padding: 0 32px;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq__grid-heading{
+    text-align: center;
+    margin: 0 0 36px;
+    font-weight: 900;
+    font-size: clamp(22px, 2.8vw, 32px);
+    letter-spacing: -0.02em;
+    color: rgb(var(--color-foreground));
+  }
+
+  /* ── Grid Layout ── */
+  .tpa-bbq--{{ section.id }} .tpa-bbq__grid{
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 22px;
+    align-items: stretch;
+  }
+
+  /* Make the last row center when fewer than 3 items */
+  .tpa-bbq--{{ section.id }} .tpa-bbq__grid .tpa-bbq-card:last-child:nth-child(3n+1){
+    grid-column: 2;
+  }
+
+  /* ── Card ── */
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 30px 28px 22px;
+    border-radius: 18px;
+    text-decoration: none;
+    border: 1px solid rgba(15, 23, 42, 0.10);
+    background: rgba(255,255,255,0.95);
+    box-shadow:
+      0 1px 3px rgba(2, 6, 23, 0.04),
+      0 8px 30px rgba(2, 6, 23, 0.07);
+    transition: transform 220ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 220ms ease;
+    cursor: pointer;
+    min-height: 290px;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card:hover{
+    transform: translateY(-6px);
+    border-color: var(--accent);
+    box-shadow:
+      0 24px 60px rgba(2, 6, 23, 0.13),
+      0 8px 22px rgba(2, 6, 23, 0.08),
+      0 0 0 1px var(--accent);
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card:focus-visible{
+    outline: 3px solid rgba(232, 93, 4, 0.35);
+    outline-offset: 3px;
+  }
+
+  /* ── Icon ── */
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__icon-wrap{
+    position: relative;
+    width: 62px;
+    height: 62px;
+    flex-shrink: 0;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__icon{
+    position: relative;
+    z-index: 1;
+    width: 62px;
+    height: 62px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(232, 93, 4, 0.08) 0%, rgba(232, 93, 4, 0.04) 100%);
+    border: 1px solid rgba(232, 93, 4, 0.10);
+    transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+                background 300ms ease,
+                border-color 300ms ease,
+                box-shadow 300ms ease;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card:hover .tpa-bbq-card__icon{
+    transform: scale(1.08) rotate(-3deg);
+    background: linear-gradient(135deg, rgba(232, 93, 4, 0.14) 0%, rgba(232, 93, 4, 0.06) 100%);
+    border-color: rgba(232, 93, 4, 0.18);
+    box-shadow: 0 8px 24px rgba(232, 93, 4, 0.15);
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__icon-glow{
+    position: absolute;
+    inset: -4px;
+    border-radius: 20px;
+    background: radial-gradient(circle, rgba(232, 93, 4, 0.12) 0%, transparent 70%);
+    opacity: 0;
+    transition: opacity 300ms ease;
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card:hover .tpa-bbq-card__icon-glow{
+    opacity: 1;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__icon img{
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    display: block;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__svg{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--accent, #E85D04);
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__svg svg{
+    width: 28px;
+    height: 28px;
+    stroke-width: 1.8;
+  }
+
+  /* ── Card Body ── */
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__body{
+    margin-top: 18px;
+    flex: 1;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__title{
+    margin: 0;
+    font-size: 21px;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    color: rgb(var(--color-foreground));
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__kicker{
+    margin-top: 8px;
+    font-size: 12.5px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__desc{
+    margin: 10px 0 0;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: rgba(var(--color-foreground), 0.65);
+  }
+
+  /* ── CTA ── */
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__cta{
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__cta-label{
+    position: relative;
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__cta-label::after{
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 250ms ease;
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card:hover .tpa-bbq-card__cta-label::after{
+    width: 100%;
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card__arrow{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 220ms ease;
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card:hover .tpa-bbq-card__arrow{
+    transform: translateX(4px);
+  }
+
+  /* ── Scroll-triggered entrance ── */
+  .tpa-bbq--{{ section.id }} [data-tpa-bbq-reveal]{
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .tpa-bbq--{{ section.id }} [data-tpa-bbq-reveal].is-revealed{
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.55s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card{
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card.is-revealed{
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 220ms ease;
+    transition-delay: calc(var(--card-idx, 0) * 0.09s);
+  }
+  .tpa-bbq--{{ section.id }} .tpa-bbq-card.is-revealed:hover{
+    transition-delay: 0s;
+  }
+
+  /* ── Responsive: Tablet ── */
+  @media (max-width: 980px){
+    .tpa-bbq--{{ section.id }} .tpa-bbq__grid{
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq__grid .tpa-bbq-card:last-child:nth-child(3n+1){
+      grid-column: auto;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card{
+      min-height: 260px;
+    }
+  }
+
+  /* ── Responsive: Mobile ── */
+  @media (max-width: 620px){
+    .tpa-bbq--{{ section.id }} .tpa-bbq__hero{
+      padding: 44px 20px 40px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq__inner{
+      padding: 0 16px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq__grid{
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card{
+      padding: 22px 20px 18px;
+      min-height: 0;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 0 16px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__icon-wrap{
+      width: 52px;
+      height: 52px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__icon{
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__svg svg{
+      width: 24px;
+      height: 24px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__body{
+      flex: 1;
+      margin-top: 0;
+      min-width: 0;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__title{
+      font-size: 18px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__desc{
+      font-size: 13.5px;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__cta{
+      width: 100%;
+      margin-top: 14px;
+      padding-top: 12px;
+    }
+  }
+
+  /* ── Reduced motion ── */
+  @media (prefers-reduced-motion: reduce){
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card,
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__icon,
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card__arrow,
+    .tpa-bbq--{{ section.id }} [data-tpa-bbq-reveal]{
+      transition: none !important;
+      animation: none !important;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq-card,
+    .tpa-bbq--{{ section.id }} [data-tpa-bbq-reveal]{
+      opacity: 1;
+      transform: none;
+    }
+    .tpa-bbq--{{ section.id }} .tpa-bbq__hero-orb{
+      animation: none;
+    }
+  }
+</style>
+
+{%- comment -%} ═══════════════════════════════ JS ═══════════════════════════════ {%- endcomment -%}
+<script>
+  (function(){
+    var section = document.querySelector('.tpa-bbq--{{ section.id }}');
+    if (!section) return;
+
+    var reveals = section.querySelectorAll('[data-tpa-bbq-reveal]');
+    var cards   = section.querySelectorAll('[data-tpa-bbq-card]');
+    var all     = [];
+    reveals.forEach(function(el){ all.push(el); });
+    cards.forEach(function(el){ all.push(el); });
+    if (!all.length) return;
+
+    if ('IntersectionObserver' in window){
+      var obs = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (entry.isIntersecting){
+            entry.target.classList.add('is-revealed');
+            obs.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+      all.forEach(function(el){ obs.observe(el); });
+    } else {
+      all.forEach(function(el){ el.classList.add('is-revealed'); });
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "TPA BBQ Category",
+  "settings": [
+    {
+      "type": "color_scheme",
+      "id": "color_scheme",
+      "label": "Color scheme",
+      "default": "scheme-1"
+    },
+    {
+      "type": "text",
+      "id": "pill_text",
+      "label": "Hero pill text",
+      "default": "BBQ"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Hero heading",
+      "default": "Premium BBQ"
+    },
+    {
+      "type": "textarea",
+      "id": "subheading",
+      "label": "Hero description",
+      "default": "Top-quality grills, smokers, and accessories backed by fast Australian shipping and dedicated local support."
+    },
+    {
+      "type": "text",
+      "id": "grid_heading",
+      "label": "Grid heading",
+      "default": "Browse by Category"
+    },
+    {
+      "type": "color",
+      "id": "accent_color",
+      "label": "Default accent",
+      "default": "#E85D04"
+    },
+    {
+      "type": "select",
+      "id": "section_width",
+      "label": "Grid width",
+      "options": [
+        { "value": "page-width", "label": "Page" },
+        { "value": "full-width", "label": "Full" }
+      ],
+      "default": "page-width"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Grid padding top",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Grid padding bottom",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "default": 56
+    }
+  ],
+  "blocks": [
+    {
+      "type": "category",
+      "name": "Category card",
+      "settings": [
+        {
+          "type": "text",
+          "id": "title",
+          "label": "Title",
+          "default": "BBQ Grills & Smokers"
+        },
+        {
+          "type": "text",
+          "id": "kicker",
+          "label": "Kicker text",
+          "default": "Charcoal, Gas & Electric"
+        },
+        {
+          "type": "textarea",
+          "id": "description",
+          "label": "Description",
+          "default": "From sizzling steaks to slow-smoked brisket — find the perfect grill or smoker for your backyard."
+        },
+        {
+          "type": "text",
+          "id": "cta_label",
+          "label": "CTA label",
+          "default": "Browse Grills & Smokers"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link"
+        },
+        {
+          "type": "image_picker",
+          "id": "icon_image",
+          "label": "Icon image (optional)"
+        },
+        {
+          "type": "select",
+          "id": "icon_style",
+          "label": "Icon",
+          "options": [
+            { "value": "grill", "label": "Grill / Smoker" },
+            { "value": "accessories", "label": "Accessories / Tools" },
+            { "value": "fuel", "label": "Fuel / Pellets" }
+          ],
+          "default": "grill"
+        },
+        {
+          "type": "color",
+          "id": "accent",
+          "label": "Accent (optional)",
+          "default": "#E85D04"
+        }
+      ]
+    }
+  ],
+  "max_blocks": 10,
+  "presets": [
+    {
+      "name": "TPA BBQ Category",
+      "blocks": [
+        {
+          "type": "category",
+          "settings": {
+            "title": "BBQ Grills & Smokers",
+            "kicker": "Charcoal, Gas & Electric",
+            "description": "From sizzling steaks to slow-smoked brisket — find the perfect grill or smoker for your backyard.",
+            "cta_label": "Browse Grills & Smokers",
+            "icon_style": "grill"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "BBQ Accessories",
+            "kicker": "Tools, Covers & More",
+            "description": "Tongs, thermometers, grill mats, covers, and everything you need for the perfect cook.",
+            "cta_label": "Browse Accessories",
+            "icon_style": "accessories"
+          }
+        },
+        {
+          "type": "category",
+          "settings": {
+            "title": "BBQ Fuel & Pellets",
+            "kicker": "Charcoal, Wood & Gas",
+            "description": "Premium charcoal, smoking wood chips, pellets, and gas bottles to keep the fire burning.",
+            "cta_label": "Browse Fuel & Pellets",
+            "icon_style": "fuel"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
