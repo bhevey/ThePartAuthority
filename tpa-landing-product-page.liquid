@@ -2309,51 +2309,58 @@
 
   /* ── SHIPPING ESTIMATOR ── */
   .tpa-lp--{{ sid }} .tpa-lp__ship-est{
-    margin-top: 16px;
-    padding: 14px 16px;
-    background: rgba(var(--color-foreground), 0.03);
-    border: 1px solid rgba(var(--color-foreground), 0.08);
-    border-radius: 12px;
+    margin-top: 20px;
+    padding: 18px 20px;
+    background: linear-gradient(135deg, rgba(29, 91, 255, 0.04) 0%, rgba(29, 91, 255, 0.01) 100%);
+    border: 1.5px solid rgba(29, 91, 255, 0.12);
+    border-radius: 14px;
+    transition: border-color 0.2s ease;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-est:hover{
+    border-color: rgba(29, 91, 255, 0.22);
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-header{
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
+    gap: 10px;
+    margin-bottom: 14px;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-icon{
-    color: rgba(var(--color-foreground), 0.5);
+    color: #1D5BFF;
     flex-shrink: 0;
+    width: 20px;
+    height: 20px;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-title{
     font-size: 13px;
     font-weight: 800;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: rgba(var(--color-foreground), 0.65);
+    letter-spacing: 0.06em;
+    color: rgba(var(--color-foreground), 0.75);
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-form{
     display: flex;
-    gap: 8px;
+    gap: 10px;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-input{
     flex: 1;
     min-width: 0;
-    padding: 10px 14px;
-    border: 1.5px solid rgba(var(--color-foreground), 0.15);
+    padding: 11px 16px;
+    border: 1.5px solid rgba(var(--color-foreground), 0.13);
     border-radius: 10px;
     font-size: 15px;
     font-weight: 600;
     background: rgb(var(--color-background));
     color: rgb(var(--color-foreground));
     outline: none;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-input:focus{
     border-color: #1D5BFF;
+    box-shadow: 0 0 0 3px rgba(29, 91, 255, 0.1);
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-btn{
-    padding: 10px 20px;
+    padding: 11px 24px;
     border: none;
     border-radius: 10px;
     background: #1D5BFF;
@@ -2361,57 +2368,96 @@
     font-size: 14px;
     font-weight: 800;
     cursor: pointer;
-    transition: background 0.15s ease, opacity 0.15s ease;
+    transition: background 0.15s ease, transform 0.1s ease, box-shadow 0.15s ease;
     white-space: nowrap;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-btn:hover{
     background: #1549d4;
+    box-shadow: 0 2px 8px rgba(29, 91, 255, 0.3);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-est-btn:active{
+    transform: scale(0.97);
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-btn:disabled{
-    opacity: 0.6;
+    opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-result{
-    margin-top: 10px;
+    margin-top: 14px;
     font-size: 14px;
     line-height: 1.5;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-result[hidden]{
     display: none;
   }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-rates-list{
+    background: rgb(var(--color-background));
+    border: 1px solid rgba(var(--color-foreground), 0.08);
+    border-radius: 10px;
+    overflow: hidden;
+  }
   .tpa-lp--{{ sid }} .tpa-lp__ship-rate{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 12px 16px;
     border-bottom: 1px solid rgba(var(--color-foreground), 0.06);
+    transition: background 0.15s ease;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-rate:last-child{
     border-bottom: none;
-    padding-bottom: 0;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-rate:hover{
+    background: rgba(var(--color-foreground), 0.02);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-rate-left{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-rate-icon{
+    flex-shrink: 0;
+    width: 18px;
+    height: 18px;
+    color: rgba(var(--color-foreground), 0.35);
+  }
+  .tpa-lp--{{ sid }} .tpa-lp__ship-rate--free .tpa-lp__ship-rate-icon{
+    color: #16a34a;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-rate-name{
+    font-size: 14px;
     font-weight: 600;
     color: rgba(var(--color-foreground), 0.8);
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-rate-price{
+    font-size: 15px;
     font-weight: 800;
     color: rgb(var(--color-foreground));
+    white-space: nowrap;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-rate-price--free{
     color: #16a34a;
+    background: rgba(22, 163, 74, 0.08);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12px;
+    letter-spacing: 0.04em;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-loading{
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+    padding: 8px 0;
     color: rgba(var(--color-foreground), 0.5);
+    font-size: 13px;
     font-weight: 600;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-spinner{
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(var(--color-foreground), 0.15);
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid rgba(29, 91, 255, 0.15);
     border-top-color: #1D5BFF;
     border-radius: 50%;
     animation: tpaShipSpin 0.6s linear infinite;
@@ -2422,10 +2468,16 @@
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-error{
     color: #dc2626;
     font-weight: 600;
+    font-size: 13px;
+    padding: 8px 12px;
+    background: rgba(220, 38, 38, 0.06);
+    border-radius: 8px;
   }
   .tpa-lp--{{ sid }} .tpa-lp__ship-est-fallback{
     color: rgba(var(--color-foreground), 0.5);
     font-weight: 600;
+    font-size: 13px;
+    padding: 8px 0;
   }
 
   /* ── PAYMENT BADGES ── */
@@ -3271,18 +3323,27 @@
       return;
     }
 
-    var html = '';
+    var truckSvg = '<svg class="tpa-lp__ship-rate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>';
+    var checkSvg = '<svg class="tpa-lp__ship-rate-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+    var html = '<div class="tpa-lp__ship-rates-list">';
     rates.forEach(function(rate){
       var priceNum = parseFloat(rate.price);
       var isFree = priceNum === 0;
       var priceDisplay = isFree ? 'FREE' : '$' + priceNum.toFixed(2);
       var priceClass = 'tpa-lp__ship-rate-price' + (isFree ? ' tpa-lp__ship-rate-price--free' : '');
+      var rowClass = 'tpa-lp__ship-rate' + (isFree ? ' tpa-lp__ship-rate--free' : '');
+      var icon = isFree ? checkSvg : truckSvg;
 
-      html += '<div class="tpa-lp__ship-rate">'
+      html += '<div class="' + rowClass + '">'
+        + '<div class="tpa-lp__ship-rate-left">'
+        + icon
         + '<span class="tpa-lp__ship-rate-name">' + rate.name + '</span>'
+        + '</div>'
         + '<span class="' + priceClass + '">' + priceDisplay + '</span>'
         + '</div>';
     });
+    html += '</div>';
     shipResult.innerHTML = html;
   }
 
