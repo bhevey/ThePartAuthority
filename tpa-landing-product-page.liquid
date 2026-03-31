@@ -3202,16 +3202,35 @@
     });
   }
 
+  function postcodeToState(pc){
+    var code = parseInt(pc, 10);
+    if (code >= 800 && code <= 999)   return 'Northern Territory';
+    if (code >= 200 && code <= 299)   return 'Australian Capital Territory';
+    if (code >= 2600 && code <= 2618) return 'Australian Capital Territory';
+    if (code >= 2900 && code <= 2920) return 'Australian Capital Territory';
+    if (code >= 1000 && code <= 2599) return 'New South Wales';
+    if (code >= 2619 && code <= 2899) return 'New South Wales';
+    if (code >= 2921 && code <= 2999) return 'New South Wales';
+    if (code >= 3000 && code <= 3999) return 'Victoria';
+    if (code >= 4000 && code <= 4999) return 'Queensland';
+    if (code >= 5000 && code <= 5999) return 'South Australia';
+    if (code >= 6000 && code <= 6797) return 'Western Australia';
+    if (code >= 6800 && code <= 6999) return 'Western Australia';
+    if (code >= 7000 && code <= 7999) return 'Tasmania';
+    return '';
+  }
+
   function pollForRates(postcode){
-    var maxAttempts = 30;
+    var maxAttempts = 12;
     var attempt = 0;
     var baseDelay = 1000;
 
     return new Promise(function(resolve, reject){
       function tryFetch(){
         attempt++;
+        var province = postcodeToState(postcode);
         var url = '/cart/shipping_rates.json?shipping_address[zip]=' + encodeURIComponent(postcode)
-          + '&shipping_address[country]=Australia&shipping_address[province]=';
+          + '&shipping_address[country]=Australia&shipping_address[province]=' + encodeURIComponent(province);
 
         fetch(url, { credentials: 'same-origin' })
           .then(function(r){
